@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remate de Empeños - Panel de Control</title>
+  <link rel="stylesheet" href="ref.css"> 
+</head>
+<body>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <img src="LOGOEMP.png" alt="Logo" class="sidebar-logo">
+      <h2>Panel de <span>Control</span></h2>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <ul>
+        <li><a href="dash.html">
+          <span class="icon">&#127968;</span> Dashboard
+        </a></li>
+        <li><a href="nuev_emp.html" >
+          <span class="icon">&#10133;</span> Nuevo Empeño
+        </a></li>
+        <li><a href="ref.html">
+          <span class="icon">&#128260;</span> Refrendo
+        </a></li>
+        <li><a href="desemp.html">
+          <span class="icon">&#9989;</span> Desempeño
+        </a></li>
+        <li><a href="reevaluo.html" >
+          <span class="icon">&#128220;</span> Reevalúo
+        </a></li>
+        <li><a href="clientes.html">
+          <span class="icon">&#128101;</span> Clientes
+        </a></li>
+        <li><a href="history.html">
+          <span class="icon">&#128214;</span> Historial Empeños
+        </a></li>
+        <li><a href="remate.html"class="active">
+          <span class="icon">&#128739;</span> Remate Empeños
+        </a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="index.html" class="logout-button">
+        <span class="icon">&#128682;</span> Cerrar Sesión
+      </a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    
+    <header class="main-header">
+      <button id="menu-toggle" class="hamburger-button">&#9776;</button>
+      <h1>Artículos en Remate</h1>
+      <div class="user-info">
+        <span>Bienvenido, <strong>Dueño</strong></span>
+      </div>
+    </header>
+
+    <main class="content">
+      
+      <div class="search-section">
+        <h3><span class="icon">&#128269;</span> Buscar en Remate</h3>
+        
+        <div class="search-form-content">
+          <form id="search-form" class="search-form">
+            <div class="input-group">
+              <label for="search-query">Buscar por Folio, Artículo o Cliente</label>
+              <input type="text" id="search-query" name="search-query" placeholder="Escribe tu término de búsqueda..." required>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <span class="icon">&#128269;</span> Buscar
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div id="remate-list-container">
+        <h3>
+          <span class="icon">&#128739;</span> Listado de Artículos en Venta
+        </h3>
+        
+        <div class="remate-list-content">
+          <div class="history-table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Folio</th>
+                  <th>Artículo</th>
+                  <th>Monto Préstamo</th>
+                  <th>Fecha Vencimiento</th>
+                  <th>Fecha Remate</th>
+                  <th>Precio Venta</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>12001</td>
+                  <td>Laptop HP Pavilion</td>
+                  <td>$4,000.00</td>
+                  <td>15/10/2025</td>
+                  <td>25/10/2025</td>
+                  <td><span class="price-venta">$5,500.00</span></td>
+                  <td><span class="status status-en-venta">En Venta</span></td>
+                </tr>
+                <tr>
+                  <td>10100</td>
+                  <td>Esmeriladora Makita</td>
+                  <td>$800.00</td>
+                  <td>10/06/2025</td>
+                  <td>20/06/2025</td>
+                  <td><span class="price-venta">$1,200.00</span></td>
+                  <td><span class="status status-vendido">Vendido</span></td>
+                </tr>
+                <tr>
+                  <td>11850</td>
+                  <td>TV Samsung 50"</td>
+                  <td>$3,500.00</td>
+                  <td>10/10/2025</td>
+                  <td>20/10/2025</td>
+                  <td><span class="price-venta">$4,800.00</span></td>
+                  <td><span class="status status-en-venta">En Venta</span></td>
+                </tr>
+                <tr>
+                  <td>10050</td>
+                  <td>Cadena de Plata</td>
+                  <td>$1,200.00</td>
+                  <td>01/06/2025</td>
+                  <td>11/06/2025</td>
+                  <td><span class="price-venta">$1,800.00</span></td>
+                  <td><span class="status status-vendido">Vendido</span></td>
+                </tr>
+                </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <script src="dashboard.js"></script>
+</body>
+</html>

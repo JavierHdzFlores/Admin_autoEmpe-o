@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Control - Auto Empeño Luna</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+  <div class="split-container">
+
+    <div class="brand-side">
+      
+      <h1>AUTO EMPEÑO <span>LUNA</span></h1>
+
+      <div class="brand-logo">
+        <img src="LOGOEMP.png" alt="Logo Auto Empeños Luna">
+      </div>
+      
+        <p>Bienvenido al Panel de Control</p>
+
+      <p class="slogan">
+        ¡NO SOMOS UNA OPCIÓN,<br>
+        <span>SOMOS TU SOLUCIÓN!</span>
+      </p>
+
+    </div>
+
+    <div class="form-side">
+      
+      <form id="login-form" class="login-form">
+        <h2>Iniciar Sesión</h2>
+        
+        <div class="input-group">
+          <label for="usuario">Usuario</label>
+          <input type="text" id="usuario" name="usuario" required>
+        </div>
+  
+        <div class="input-group">
+          <label for="contrasena">Contraseña</label>
+          <input type="password" id="contrasena" name="contrasena" required>
+        </div>
+  
+        <button type="submit" class="login-button">Ingresar</button>
+        
+        <p id="error-message" class="error-message">
+          Usuario o contraseña incorrectos.
+        </p>
+      </form>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

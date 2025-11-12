@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desempeño - Panel de Control</title>
+  <link rel="stylesheet" href="ref.css"> 
+</head>
+<body>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <img src="LOGOEMP.png" alt="Logo" class="sidebar-logo">
+      <h2>Panel de <span>Control</span></h2>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <ul>
+        <li><a href="dash.html">
+          <span class="icon">&#127968;</span> Dashboard
+        </a></li>
+        <li><a href="nuev_emp.html" >
+          <span class="icon">&#10133;</span> Nuevo Empeño
+        </a></li>
+        <li><a href="ref.html">
+          <span class="icon">&#128260;</span> Refrendo
+        </a></li>
+        <li><a href="desemp.html" class="active">
+          <span class="icon">&#9989;</span> Desempeño
+        </a></li>
+        <li><a href="reevaluo.html">
+          <span class="icon">&#128220;</span> Reevalúo
+        </a></li>
+        <li><a href="clientes.html">
+          <span class="icon">&#128101;</span> Clientes
+        </a></li>
+        <li><a href="history.html">
+          <span class="icon">&#128214;</span> Historial Empeños
+        </a></li>
+        <li><a href="remate.html">
+          <span class="icon">&#128739;</span> Remate Empeños
+        </a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="index.html" class="logout-button">
+        <span class="icon">&#128682;</span> Cerrar Sesión
+      </a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    
+    <header class="main-header">
+      <button id="menu-toggle" class="hamburger-button">&#9776;</button>
+      <h1>Registrar Desempeño</h1>
+      <div class="user-info">
+        <span>Bienvenido, <strong>Dueño</strong></span>
+      </div>
+    </header>
+
+    <main class="content">
+      
+      <div class="search-section">
+        <h3><span class="icon">&#128269;</span> Buscar Empeño</h3>
+        
+        <div class="search-form-content">
+          <form id="search-form" class="search-form">
+            <div class="input-group">
+              <label for="search-query">Buscar por Folio, Celular, Nombre o INE</label>
+              <input type="text" id="search-query" name="search-query" placeholder="Escribe tu término de búsqueda..." required>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <span class="icon">&#128269;</span> Buscar
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div id="refrendo-details"> 
+        <h3>
+          <span class="icon">&#128100;</span> Datos del Empeño 
+          <span class="folio">(Folio: 12345)</span>
+        </h3>
+        
+        <div class="refrendo-details-content"> 
+          <div class="form-grid">
+            <div class="input-group">
+              <label>Cliente</label>
+              <input type="text" value="Maria López" readonly>
+            </div>
+            <div class="input-group">
+              <label>Artículo</label>
+              <input type="text" value="Anillo de Oro 14k" readonly>
+            </div>
+          </div>
+
+          <h3 class="subsection-title">
+            <span class="icon">&#128176;</span> Detalles del Préstamo
+          </h3>
+          <div class="form-grid cols-3">
+            <div class="input-group">
+              <label>Monto Préstamo ($)</label>
+              <input type="text" value="$5,000.00" readonly>
+            </div>
+            <div class="input-group">
+              <label>Monto Refrendo (Interés Base) ($)</label>
+              <input type="text" value="$500.00" readonly>
+            </div>
+            <div class="input-group">
+              <label>Fecha de Vencimiento</label>
+              <input type="date" value="2025-10-23" readonly>
+            </div>
+            
+            <div class="input-group">
+              <label for="total-desempeno-base">Total Desempeño (Base)</label>
+              <input type="text" id="total-desempeno-base" name="total-desempeno-base" value="$5,500.00" readonly>
+            </div>
+            </div>
+
+          <h3 class="subsection-title">
+            <span class="icon">&#128203;</span> Cálculo de Pago (Hoy: 30/10/2025)
+          </h3>
+          
+          <div class="payment-summary">
+            <div class="summary-item">
+              <span>Monto del Préstamo (Capital):</span>
+              <span>$5,000.00</span>
+            </div>
+            <div class="summary-item">
+              <span>Monto Refrendo (Interés):</span>
+              <span>$500.00</span>
+            </div>
+            <div class="summary-item info">
+              <span>Días de Gracia (Máx. 5 días):</span>
+              <span>5 días (Vencido el 28/10/2025)</span>
+            </div>
+            <div class="summary-item penalty">
+              <span>Días de Retraso (después de gracia):</span>
+              <span>2 días (Día 29 y 30)</span>
+            </div>
+            <div class="summary-item penalty">
+              <span>Multa (10% del refrendo por día):</span>
+              <span>$100.00</span>
+            </div>
+            <div class="summary-item-details">
+              <span>(Día 6: $50.00 + Día 7: $50.00)</span>
+            </div>
+            <div class="summary-total">
+              <span>TOTAL A PAGAR (DESEMPEÑO):</span>
+              <span>$5,600.00</span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Confirmar Desempeño y Entregar</button>
+          </div>
+        </div> 
+      </div>
+
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <script src="dashboard.js"></script>
+</body>
+</html>
