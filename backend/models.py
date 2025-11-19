@@ -15,6 +15,7 @@ class EstadoEmpeno(str, enum.Enum):
     vencido = "Vencido"
     desempenado = "Desempeñado"
     rematado = "Rematado"
+    vendido = "Vendido"
     perdido = "Perdido"
 
 class TipoMovimiento(str, enum.Enum):
@@ -22,6 +23,7 @@ class TipoMovimiento(str, enum.Enum):
     desempeno = "Desempeño"
     abono = "Abono Capital"
     venta = "Venta Remate"
+    reevaluo = "Reevaluo"
 
 # --- 1. Tabla Usuarios ---
 class Usuario(Base):

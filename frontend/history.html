@@ -67,13 +67,10 @@
         
         <div class="search-form-content">
           <form id="search-form" class="search-form">
-            <div class="input-group">
-              <label for="search-query">Buscar por Folio, Cliente, Artículo o Estado</label>
-              <input type="text" id="search-query" name="search-query" placeholder="Escribe tu término de búsqueda..." required>
+            <div class="search-bar">
+              <input type="text" id="busqueda-producto" placeholder="Buscar por Artículo, Cliente o Folio...">
+              <button type="button" id="btn-buscar" class="search-btn">Buscar</button>
             </div>
-            <button type="submit" class="btn btn-primary">
-              <span class="icon">&#128269;</span> Buscar
-            </button>
           </form>
         </div>
       </div>
@@ -90,60 +87,15 @@
                 <tr>
                   <th>Folio</th>
                   <th>Cliente</th>
-                  <th>Artículo</th>
-                  <th>Monto Préstamo</th>
+                  <th>Artículo</th> <th>Monto Préstamo</th>
                   <th>Fecha Empeño</th>
                   <th>Fecha Venc.</th>
                   <th>Estado</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>12345</td>
-                  <td>Maria López</td>
-                  <td>Anillo de Oro 14k</td>
-                  <td>$5,000.00</td>
-                  <td>23/09/2025</td>
-                  <td>23/10/2025</td>
-                  <td><span class="status status-vigente">Vigente</span></td>
-                </tr>
-                <tr>
-                  <td>12001</td>
-                  <td>Juan Pérez</td>
-                  <td>Laptop HP Pavilion</td>
-                  <td>$4,000.00</td>
-                  <td>15/09/2025</td>
-                  <td>15/10/2025</td>
-                  <td><span class="status status-vencido">Vencido</span></td>
-                </tr>
-                <tr>
-                  <td>11500</td>
-                  <td>Carlos Sánchez</td>
-                  <td>Celular Samsung A51</td>
-                  <td>$2,500.00</td>
-                  <td>01/08/2025</td>
-                  <td>01/09/2025</td>
-                  <td><span class="status status-desempenado">Desempeñado</span></td>
-                </tr>
-                <tr>
-                  <td>10100</td>
-                  <td>Maria López</td>
-                  <td>Esmeriladora Makita</td>
-                  <td>$800.00</td>
-                  <td>10/05/2025</td>
-                  <td>10/06/2025</td>
-                  <td><span class="status status-rematado">Rematado</span></td>
-                </tr>
-                 <tr>
-                  <td>10050</td>
-                  <td>Juan Pérez</td>
-                  <td>Cadena de Plata</td>
-                  <td>$1,200.00</td>
-                  <td>01/05/2025</td>
-                  <td>01/06/2025</td>
-                  <td><span class="status status-vendido">Vendido</span></td>
-                </tr>
-                </tbody>
+              <tbody id="tabla-historial-body">
+                <tr><td colspan="7" style="text-align:center">Cargando historial...</td></tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -153,6 +105,102 @@
   </div>
 
   <div class="overlay" id="overlay"></div>
-  <script src="dashboard.js"></script>
+  <script>
+    // 1. SEGURIDAD
+    const token = localStorage.getItem('token_auto_empeno');
+    if (!token) window.location.href = 'login.html';
+
+    let historialCompleto = []; // Aquí guardaremos todo para buscar rápido
+
+    // 2. CARGAR DATOS AL INICIO
+    document.addEventListener('DOMContentLoaded', async () => {
+      const tbody = document.getElementById('tabla-historial-body');
+      
+      try {
+        const response = await fetch('http://localhost:8000/empenos/todos', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          historialCompleto = await response.json();
+          renderizarTabla(historialCompleto); // Mostrar todo al principio
+        } else {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">Error al cargar datos</td></tr>';
+        }
+      } catch (error) {
+        console.error(error);
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">Error de conexión</td></tr>';
+      }
+    });
+
+    // 3. FUNCIÓN PARA DIBUJAR LA TABLA
+    function renderizarTabla(datos) {
+      const tbody = document.getElementById('tabla-historial-body');
+      tbody.innerHTML = '';
+
+      if (datos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No se encontraron coincidencias.</td></tr>';
+        return;
+      }
+
+      datos.forEach(item => {
+        const tr = document.createElement('tr');
+        
+        // Resolver nombre del cliente
+        let clienteNombre = `Cliente #${item.cliente_id}`;
+        if(item.cliente) {
+            clienteNombre = `${item.cliente.nombre} ${item.cliente.apellidos}`;
+        }
+
+        // Formato Moneda
+        const monto = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.monto_prestamo);
+        
+        // Estilo de Estado (minusculas para CSS)
+        const estadoClase = item.estado.toLowerCase();
+
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td>${clienteNombre}</td>
+          <td style="font-weight:bold; color:#113b64;">${item.marca_modelo}</td> <td>${monto}</td>
+          <td>${item.fecha_empeno}</td>
+          <td>${item.fecha_vencimiento}</td>
+          <td><span class="status status-${estadoClase}">${item.estado}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 4. LÓGICA DE BÚSQUEDA (FILTRO)
+    const inputBusqueda = document.getElementById('busqueda-producto');
+    
+    inputBusqueda.addEventListener('input', (e) => {
+        const texto = e.target.value.toLowerCase();
+
+        const filtrados = historialCompleto.filter(item => {
+            // Buscamos en: Artículo O Cliente O Folio
+            const matchArticulo = item.marca_modelo.toLowerCase().includes(texto);
+            const matchFolio = item.id.toString().includes(texto);
+            
+            let matchCliente = false;
+            if(item.cliente) {
+              const nombreC = `${item.cliente.nombre} ${item.cliente.apellidos}`.toLowerCase();
+              matchCliente = nombreC.includes(texto);
+            }
+
+            return matchArticulo || matchFolio || matchCliente;
+        });
+
+        renderizarTabla(filtrados);
+    });
+
+    // Lógica Logout (por si acaso)
+    const btnLogout = document.querySelector('.logout-button');
+    if(btnLogout){
+        btnLogout.addEventListener('click', (e) => {
+            localStorage.removeItem('token_auto_empeno');
+            window.location.href = 'login.html';
+        });
+    }
+  </script>
 </body>
 </html>

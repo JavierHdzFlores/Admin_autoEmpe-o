@@ -62,129 +62,88 @@
 
     <main class="content">
       
-      <div class="search-section">
-        <h3><span class="icon">&#128269;</span> Buscar Cliente</h3>
-        
-        <div class="search-form-content">
-          <form id="search-form" class="search-form">
-            <div class="input-group">
-              <label for="search-query">Buscar por Celular, Nombre o INE</label>
-              <input type="text" id="search-query" name="search-query" placeholder="Escribe tu término de búsqueda..." required>
-            </div>
-            <button type="submit" class="btn btn-primary">
-              <span class="icon">&#128269;</span> Buscar
-            </button>
-          </form>
+      <div class="filters">
+        <div class="filter-group">
+          <label>Buscar Cliente / Artículo:</label>
+          <button type="button" id="btn-buscar" class="search-btn">Buscar</button>
+          <input type="text" id="filtro-texto" placeholder="Nombre, Folio o Artículo...">
         </div>
-      </div>
+        
+        <div class="filter-group">
+          <label>Estado:</label>
+          <select id="filtro-estado">
+            <option value="">Todos</option>
+            <option value="Vigente">Vigente</option>
+            <option value="Vencido">Vencido</option>
+            <option value="Desempeñado">Desempeñado</option>
+            <option value="Rematado">Rematado</option>
+          </select>
+        </div>
 
+        <div class="filter-group">
+          <label>Desde:</label>
+          <input type="date" id="filtro-fecha-inicio">
+        </div>
+        
+        <div class="filter-group">
+          <label>Hasta:</label>
+          <input type="date" id="filtro-fecha-fin">
+        </div>
+
+        <button class="btn-secondary" onclick="limpiarFiltros()" style="height: 40px; align-self: flex-end;">Limpiar</button>
+        
+        <div class="search-bar">
+                
+      </div>
+      </div>
+      
       <div id="client-details">
         <h3>
-          <span class="icon">&#128100;</span> Datos del Cliente
+          <span class="icon">&#128100;</span> Clientes Recientes
         </h3>
+        <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Folio</th>
+            <th>Artículo</th>
+            <th>Monto</th>
+            <th>Fecha Empeño</th>
+            <th>Vencimiento</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-clientes-body">
+          </tbody>
+      </table>
         
-        <div class="client-details-content">
-          <div class="form-grid">
-            <div class="input-group full-width">
-              <label>Nombre Completo</label>
-              <input type="text" value="Maria Guadalupe López García" readonly>
-            </div>
-            <div class="input-group">
-              <label>Teléfono / Celular</label>
-              <input type="text" value="953 111 2233" readonly>
-            </div>
-            <div class="input-group">
-              <label>Núm. de INE</label>
-              <input type="text" value="1234567890123" readonly>
-            </div>
-            <div class="input-group full-width">
-              <label>Dirección</label>
-              <input type="text" value="Calle Falsa 123, Col. Centro, Huajuapan de León" readonly>
-            </div>
+        <h3 class="subsection-title">
+          <span class="icon">&#128202;</span> Resumen de Actividad
+        </h3>
+
+        <div class="client-stats-grid">
+          <div class="card">
+            <h3>Empeños Totales</h3>
+            <span class="stat-number" id="stat-total">0</span>
           </div>
-
-          <h3 class="subsection-title">
-            <span class="icon">&#128202;</span> Resumen de Actividad
-          </h3>
-          <div class="client-stats-grid">
-            <div class="card">
-              <h3>Empeños Totales</h3>
-              <span class="stat-number">5</span>
-            </div>
-            <div class="card">
-              <h3>Empeños Activos</h3>
-              <span class="stat-number">2</span>
-            </div>
-            <div class="card">
-              <h3>Desempeñados</h3>
-              <span class="stat-number">2</span>
-            </div>
-            <div class="card">
-              <h3>Empeños Perdidos</h3>
-              <span class="stat-number">1</span>
-            </div>
-            </div>
-
-          <h3 class="subsection-title">
-            <span class="icon">&#128214;</span> Historial de Empeños
-          </h3>
           
-          <div class="history-table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Folio</th>
-                  <th>Artículo</th>
-                  <th>Monto Préstamo</th>
-                  <th>Fecha Empeño</th>
-                  <th>Fecha Venc.</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>12345</td>
-                  <td>Anillo de Oro 14k</td>
-                  <td>$5,000.00</td>
-                  <td>23/09/2025</td>
-                  <td>23/10/2025</td>
-                  <td><span class="status status-vigente">Vigente</span></td>
-                </tr>
-                <tr>
-                  <td>12001</td>
-                  <td>Laptop HP Pavilion</td>
-                  <td>$4,000.00</td>
-                  <td>15/09/2025</td>
-                  <td>15/10/2025</td>
-                  <td><span class="status status-vencido">Vencido</span></td>
-                </tr>
-                <tr>
-                  <td>11500</td>
-                  <td>Celular Samsung A51</td>
-                  <td>$2,500.00</td>
-                  <td>01/08/2025</td>
-                  <td>01/09/2025</td>
-                  <td><span class="status status-desempenado">Desempeñado</span></td>
-                </tr>
-                <tr>
-                  <td>10100</td>
-                  <td>Esmeriladora Makita</td>
-                  <td>$800.00</td>
-                  <td>10/05/2025</td>
-                  <td>10/06/2025</td>
-                  <td><span class="status status-rematado">Rematado</span></td>
-                </tr>
-                <tr>
-                  <td>10050</td>
-                  <td>Cadena de Plata</td>
-                  <td>$1,200.00</td>
-                  <td>01/05/2025</td>
-                  <td>01/06/2025</td>
-                  <td><span class="status status-desempenado">Desempeñado</span></td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="card">
+            <h3>Empeños Activos</h3>
+            <span class="stat-number" id="stat-activos">0</span>
           </div>
+          
+          <div class="card">
+            <h3>Desempeñados</h3>
+            <span class="stat-number" id="stat-desempenados">0</span>
+          </div>
+          
+          <div class="card">
+            <h3>Empeños Perdidos</h3>
+            <span class="stat-number" id="stat-perdidos">0</span>
+          </div>
+        </div>
+      </table>
+    </div>
 
         </div>
       </div>
@@ -193,81 +152,149 @@
   </div>
 
   <div class="overlay" id="overlay"></div>
-  <script>
-    // --- 1. SEGURIDAD: Verificar si hay token ---
+ <script>
     const token = localStorage.getItem('token_auto_empeno');
-    if (!token) {
-      window.location.href = 'login.html';
-    }
+    if (!token) window.location.href = 'login.html';
 
-    // --- 2. LÓGICA DE CERRAR SESIÓN (LOGOUT) ---
-    const btnLogout = document.querySelector('.logout-button');
-    
-    if (btnLogout) {
-        btnLogout.addEventListener('click', (e) => {
-            e.preventDefault(); // ¡Importante! Evita que el enlace actúe normal
-            
-            // Borramos la llave
-            localStorage.removeItem('token_auto_empeno');
-            
-            // Redirigimos al login
-            window.location.href = 'login.html';
-        });
-    }
+    let todosLosEmpenos = [];
 
-    // --- 3. CARGAR TABLA DE CLIENTES/EMPEÑOS ---
+    // --- 1. CARGAR DATOS ---
     async function cargarTabla() {
+      const tbody = document.getElementById('tabla-clientes-body');
+      // tbody.innerHTML = '... cargando ...'; (Opcional)
+
       try {
         const response = await fetch('http://localhost:8000/empenos/todos', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (response.ok) {
-          const empenos = await response.json();
+          todosLosEmpenos = await response.json();
           
-          // Buscamos el cuerpo de la tabla
-          // ¡Asegúrate de ponerle id="tabla-clientes-body" a tu <tbody> en el HTML!
-          const tbody = document.querySelector('tbody'); 
-          tbody.innerHTML = ''; // Limpiamos los datos de ejemplo
-
-          if (empenos.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay registros aún.</td></tr>';
-              return;
-          }
-
-          // Dibujamos cada fila con datos reales
-          empenos.forEach(empeno => {
-            const fila = document.createElement('tr');
-            
-            // Nota: empeno.fecha_vencimiento viene como YYYY-MM-DD
-            fila.innerHTML = `
-              <td>${empeno.cliente_id}</td> 
-              <td>${empeno.id}</td>
-              <td>${empeno.marca_modelo}</td>
-              <td>$${empeno.monto_prestamo}</td>
-              <td>${empeno.fecha_empeno}</td>
-              <td>${empeno.fecha_vencimiento}</td>
-              <td><span class="status status-${empeno.estado.toLowerCase()}">${empeno.estado}</span></td>
-            `;
-            tbody.appendChild(fila);
-          });
+          // A. Dibujamos la tabla
+          renderizarTabla(todosLosEmpenos);
+          
+          // B. Calculamos los contadores de arriba (¡NUEVO!)
+          calcularEstadisticas(todosLosEmpenos);
 
         } else {
-          console.error("Error del servidor:", response.status);
-          if(response.status === 401) {
-              localStorage.removeItem('token_auto_empeno');
-              window.location.href = 'login.html';
-          }
+          console.error("Error cargando datos");
+          if(response.status === 401) window.location.href = 'login.html';
         }
       } catch (error) {
         console.error("Error de conexión:", error);
       }
     }
 
-    // Ejecutar al cargar la página
+    // --- 2. FUNCIÓN MATEMÁTICA DE RESUMEN (NUEVO) ---
+    function calcularEstadisticas(datos) {
+        // 1. Total Histórico
+        document.getElementById('stat-total').innerText = datos.length;
+
+        // 2. Activos (Sumamos Vigentes y Vencidos, pues aun tienes la prenda)
+        const activos = datos.filter(item => 
+            item.estado === 'Vigente' || item.estado === 'Vencido'
+        ).length;
+        document.getElementById('stat-activos').innerText = activos;
+
+        // 3. Desempeñados (Ya pagaron y se fueron)
+        const desempenados = datos.filter(item => item.estado === 'Desempeñado').length;
+        document.getElementById('stat-desempenados').innerText = desempenados;
+
+        // 4. Perdidos (Rematados / Vendidos)
+        const perdidos = datos.filter(item => 
+            item.estado === 'Rematado' || item.estado === 'Vendido'
+        ).length;
+        document.getElementById('stat-perdidos').innerText = perdidos;
+    }
+
+    // --- 3. RENDERIZAR TABLA (Ya lo tenías) ---
+    function renderizarTabla(listaDatos) {
+      const tbody = document.getElementById('tabla-clientes-body');
+      tbody.innerHTML = '';
+
+      if (listaDatos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No se encontraron registros.</td></tr>';
+        return;
+      }
+
+      listaDatos.forEach(item => {
+        const tr = document.createElement('tr');
+        
+        let nombreCliente = `Cliente #${item.cliente_id}`;
+        if (item.cliente) {
+            nombreCliente = `${item.cliente.nombre} ${item.cliente.apellidos}`;
+        }
+
+        const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.monto_prestamo);
+        const estadoClass = item.estado.toLowerCase();
+
+        tr.innerHTML = `
+          <td><strong>${nombreCliente}</strong></td> 
+          <td>${item.id}</td>
+          <td>${item.marca_modelo}</td>
+          <td>${montoFmt}</td>
+          <td>${item.fecha_empeno}</td>
+          <td>${item.fecha_vencimiento}</td>
+          <td><span class="status status-${estadoClass}">${item.estado}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- 4. FILTROS (Ya lo tenías, se mantiene igual) ---
+    function filtrarDatos() {
+      const texto = document.getElementById('filtro-texto').value.toLowerCase();
+      const estado = document.getElementById('filtro-estado').value;
+      const fechaInicio = document.getElementById('filtro-fecha-inicio').value;
+      const fechaFin = document.getElementById('filtro-fecha-fin').value;
+
+      const datosFiltrados = todosLosEmpenos.filter(item => {
+        const nombreC = item.cliente ? `${item.cliente.nombre} ${item.cliente.apellidos}` : '';
+        
+        const coincideTexto = 
+            item.marca_modelo.toLowerCase().includes(texto) ||
+            item.id.toString().includes(texto) ||
+            nombreC.toLowerCase().includes(texto);
+
+        const coincideEstado = estado === "" || item.estado === estado;
+
+        let coincideFecha = true;
+        if (fechaInicio && fechaFin) {
+          const fechaItem = new Date(item.fecha_empeno);
+          const fInicio = new Date(fechaInicio);
+          const fFin = new Date(fechaFin);
+          coincideFecha = fechaItem >= fInicio && fechaItem <= fFin;
+        }
+
+        return coincideTexto && coincideEstado && coincideFecha;
+      });
+
+      renderizarTabla(datosFiltrados);
+      
+      // Opcional: ¿Quieres que los números de arriba cambien al filtrar?
+      // Si sí, descomenta la siguiente línea:
+      // calcularEstadisticas(datosFiltrados); 
+    }
+
+    // Listeners
+    document.getElementById('filtro-texto').addEventListener('input', filtrarDatos);
+    document.getElementById('filtro-estado').addEventListener('change', filtrarDatos);
+    document.getElementById('filtro-fecha-inicio').addEventListener('change', filtrarDatos);
+    document.getElementById('filtro-fecha-fin').addEventListener('change', filtrarDatos);
+
+    // Inicializar
     document.addEventListener('DOMContentLoaded', cargarTabla);
+
+    // Logout
+    const btnLogout = document.querySelector('.logout-button');
+    if(btnLogout){
+        btnLogout.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token_auto_empeno');
+            window.location.href = 'login.html';
+        });
+    }
   </script>
 </body>
 </html>

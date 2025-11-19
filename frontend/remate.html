@@ -61,89 +61,157 @@
     </header>
 
     <main class="content">
-      
-      <div class="search-section">
-        <h3><span class="icon">&#128269;</span> Buscar en Remate</h3>
-        
-        <div class="search-form-content">
-          <form id="search-form" class="search-form">
-            <div class="input-group">
-              <label for="search-query">Buscar por Folio, Artículo o Cliente</label>
-              <input type="text" id="search-query" name="search-query" placeholder="Escribe tu término de búsqueda..." required>
-            </div>
-            <button type="submit" class="btn btn-primary">
-              <span class="icon">&#128269;</span> Buscar
-            </button>
-          </form>
-        </div>
+      <div class="search-bar">
+        <input type="text" id="busqueda-remate" placeholder="Buscar artículo en venta...">
+        <button type="button" id="btn-buscar-remate" class="search-btn">Buscar</button>
       </div>
 
-      <div id="remate-list-container">
-        <h3>
-          <span class="icon">&#128739;</span> Listado de Artículos en Venta
-        </h3>
-        
-        <div class="remate-list-content">
-          <div class="history-table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Folio</th>
-                  <th>Artículo</th>
-                  <th>Monto Préstamo</th>
-                  <th>Fecha Vencimiento</th>
-                  <th>Fecha Remate</th>
-                  <th>Precio Venta</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>12001</td>
-                  <td>Laptop HP Pavilion</td>
-                  <td>$4,000.00</td>
-                  <td>15/10/2025</td>
-                  <td>25/10/2025</td>
-                  <td><span class="price-venta">$5,500.00</span></td>
-                  <td><span class="status status-en-venta">En Venta</span></td>
-                </tr>
-                <tr>
-                  <td>10100</td>
-                  <td>Esmeriladora Makita</td>
-                  <td>$800.00</td>
-                  <td>10/06/2025</td>
-                  <td>20/06/2025</td>
-                  <td><span class="price-venta">$1,200.00</span></td>
-                  <td><span class="status status-vendido">Vendido</span></td>
-                </tr>
-                <tr>
-                  <td>11850</td>
-                  <td>TV Samsung 50"</td>
-                  <td>$3,500.00</td>
-                  <td>10/10/2025</td>
-                  <td>20/10/2025</td>
-                  <td><span class="price-venta">$4,800.00</span></td>
-                  <td><span class="status status-en-venta">En Venta</span></td>
-                </tr>
-                <tr>
-                  <td>10050</td>
-                  <td>Cadena de Plata</td>
-                  <td>$1,200.00</td>
-                  <td>01/06/2025</td>
-                  <td>11/06/2025</td>
-                  <td><span class="price-venta">$1,800.00</span></td>
-                  <td><span class="status status-vendido">Vendido</span></td>
-                </tr>
-                </tbody>
-            </table>
-          </div>
-        </div>
+      <div class="history-table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Folio</th>
+              <th>Artículo</th>
+              <th>Precio Sugerido</th> <th>Fecha Ingreso</th>
+              <th>Estado</th>
+              <th>Acción</th> </tr>
+          </thead>
+          <tbody id="tabla-remates-body">
+            </tbody>
+        </table>
+      </div>
       </div>
 
     </main>
   </div>
 
   <div class="overlay" id="overlay"></div>
-  <script src="dashboard.js"></script>
+  <script>
+    const token = localStorage.getItem('token_auto_empeno');
+    if (!token) window.location.href = 'login.html';
+
+    let inventarioRemates = [];
+
+    // 1. CARGAR Y FILTRAR
+    document.addEventListener('DOMContentLoaded', async () => {
+      const tbody = document.getElementById('tabla-remates-body');
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Cargando inventario...</td></tr>';
+
+      try {
+        const res = await fetch('http://localhost:8000/empenos/todos', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          const todos = await res.json();
+          
+          // --- FILTRO MAESTRO ---
+          // Solo queremos ver lo que está 'Rematado' (En Venta) o 'Vendido'
+          inventarioRemates = todos.filter(item => 
+              item.estado === 'Rematado' || item.estado === 'Vendido'
+          );
+
+          renderizarTabla(inventarioRemates);
+        }
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Error de conexión</td></tr>';
+      }
+    });
+
+    // 2. DIBUJAR TABLA
+    function renderizarTabla(lista) {
+      const tbody = document.getElementById('tabla-remates-body');
+      tbody.innerHTML = '';
+
+      if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No hay artículos en remate o vendidos.</td></tr>';
+        return;
+      }
+
+      lista.forEach(item => {
+        const tr = document.createElement('tr');
+        
+        // Lógica visual: Si dice "Rematado" en BD, mostramos "En Venta" en pantalla
+        let etiquetaEstado = '';
+        let botonAccion = '';
+        let precioSugerido = item.monto_prestamo * 1.5; // Ejemplo: Se vende al 150% del préstamo
+
+        if (item.estado === 'Rematado') {
+            etiquetaEstado = '<span class="status status-rematado">En Venta</span>'; // Usamos clase visual
+            // Botón para vender
+            botonAccion = `
+              <button class="btn-vender" onclick="venderArticulo(${item.id}, '${item.marca_modelo}', ${precioSugerido})">
+                  💲 Vender
+              </button>`;
+        } else if (item.estado === 'Vendido') {
+            etiquetaEstado = '<span class="status status-vendido">Vendido</span>';
+            botonAccion = '<span style="color:grey; font-size:0.8em;">Venta Finalizada</span>';
+        }
+
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td style="font-weight:bold;">${item.marca_modelo}</td>
+          <td>$${precioSugerido.toFixed(2)}</td>
+          <td>${item.fecha_vencimiento}</td> <td>${etiquetaEstado}</td>
+          <td>${botonAccion}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 3. BUSCADOR
+    const inputBus = document.getElementById('busqueda-remate');
+    inputBus.addEventListener('input', (e) => {
+        const texto = e.target.value.toLowerCase();
+        const filtrados = inventarioRemates.filter(item => 
+            item.marca_modelo.toLowerCase().includes(texto) || 
+            item.id.toString().includes(texto)
+        );
+        renderizarTabla(filtrados);
+    });
+
+    // 4. FUNCIÓN VENDER
+    window.venderArticulo = async function(id, nombre, precioSugerido) {
+        const precioReal = prompt(`Vender "${nombre}".\nPrecio Sugerido: $${precioSugerido}\n\nIngresa el precio final de venta:`, precioSugerido);
+        
+        if (precioReal === null) return; // Cancelado
+        
+        try {
+            const res = await fetch(`http://localhost:8000/empenos/${id}/venta`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ precio_venta: parseFloat(precioReal) })
+            });
+
+            if (res.ok) {
+                alert("✅ ¡Artículo vendido y dinero ingresado a caja!");
+                window.location.reload();
+            } else {
+                alert("Error al registrar venta");
+            }
+        } catch (e) {
+            alert("Error de conexión");
+        }
+    }
+  </script>
+
+  <style>
+      .status-rematado { background-color: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+      .status-vendido { background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+      
+      .btn-vender {
+          background-color: #28a745;
+          color: white;
+          border: none;
+          padding: 5px 10px;
+          border-radius: 4px;
+          cursor: pointer;
+      }
+      .btn-vender:hover { background-color: #218838; }
+  </style>
 </body>
 </html>

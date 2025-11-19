@@ -21,6 +21,7 @@ class TipoMovimiento(str, Enum):
     desempeno = "Desempeño"
     abono = "Abono Capital"
     venta = "Venta Remate"
+    reevaluo = "Reevaluo"
 
 # --- ESQUEMAS DE MOVIMIENTOS DE CAJA ---
 class MovimientoCajaBase(BaseModel):
@@ -70,6 +71,7 @@ class Empeno(EmpenoBase):
     estado: EstadoEmpeno
     
     # Estos campos se calculan en el backend antes de responder
+    #cliente: Optional["Cliente"] = None
     monto_refrendo: Optional[Decimal] = None 
     total_desempeno: Optional[Decimal] = None 
     
@@ -127,3 +129,9 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+    # --- Agrega esto al final de schemas.py ---
+class ReevaluoRequest(BaseModel):
+    nuevo_prestamo: float
+    nuevo_valuo: float
+    nuevo_interes: float

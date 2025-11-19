@@ -4,6 +4,7 @@ from datetime import date, timedelta
 # IMPORTANTE: Sin puntos para que Docker lo lea bien
 import models, schemas, security 
 
+
 # ==========================================
 # USUARIOS
 # ==========================================
@@ -156,3 +157,88 @@ def create_movimiento(db: Session, movimiento: schemas.MovimientoCajaCreate, usu
     db.refresh(db_movimiento)
     return db_movimiento
 
+
+# --- REEVALÚO (Aumentar Préstamo) ---
+def procesar_reevaluo(db: Session, empeno_id: int, nuevo_prestamo: float, nuevo_valuo: float, nuevo_interes: float):
+    empeno = get_empeno(db, empeno_id)
+    if not empeno:
+        return None
+
+    # 1. Calcular la diferencia (Dinero que sale de caja hacia el cliente)
+    diferencia_a_entregar = nuevo_prestamo - float(empeno.monto_prestamo)
+    
+    # 2. Actualizar datos del empeño
+    empeno.monto_prestamo = nuevo_prestamo
+    empeno.valor_valuo = nuevo_valuo
+    empeno.interes_mensual_pct = nuevo_interes
+    
+    # Al reevaluar, se renueva la fecha de vencimiento a 30 días desde hoy
+    empeno.fecha_vencimiento = date.today() + timedelta(days=30)
+    empeno.estado = models.EstadoEmpeno.vigente # Se reactiva
+
+    # 3. Registrar Movimiento de Caja (Solo si hubo entrega de dinero)
+    if diferencia_a_entregar > 0:
+        movimiento = models.MovimientoCaja(
+            empeno_id=empeno.id,
+            usuario_id=1, # Asignado al admin por ahora
+            tipo_movimiento=models.TipoMovimiento.reevaluo,
+            monto=diferencia_a_entregar * -1, # Es negativo porque SALE dinero de tu caja
+            nota=f"Reevaluo: Aumento de préstamo"
+        )
+        db.add(movimiento)
+
+    db.commit()
+    db.refresh(empeno)
+    return empeno
+
+# --- DESEMPEÑO (Liquidar y retirar prenda) ---
+def procesar_desempeno(db: Session, empeno_id: int):
+    empeno = get_empeno(db, empeno_id)
+    if not empeno:
+        return None
+    
+    # 1. Calcular el total a cobrar (Capital + Interés del mes)
+    # Para hacerlo simple, cobramos lo que tenga calculado en el frontend o recalcula aquí
+    interes = empeno.monto_prestamo * (empeno.interes_mensual_pct / 100)
+    total_cobrar = empeno.monto_prestamo + interes
+
+    # 2. Registrar entrada de dinero en Caja
+    movimiento = models.MovimientoCaja(
+        empeno_id=empeno.id,
+        usuario_id=1, # Usuario Admin por defecto
+        tipo_movimiento=models.TipoMovimiento.desempeno,
+        monto=total_cobrar, # Positivo porque ENTRA dinero
+        nota="Liquidación Total (Desempeño)"
+    )
+    db.add(movimiento)
+
+    # 3. Liberar el empeño (Cambiar estado)
+    empeno.estado = models.EstadoEmpeno.desempenado
+    # Opcional: Podrías poner la fecha de vencimiento en None o dejarla como registro histórico
+    
+    db.commit()
+    db.refresh(empeno)
+    return empeno
+
+# --- VENTA DE ARTÍCULO REMATADO ---
+def procesar_venta_remate(db: Session, empeno_id: int, precio_venta: float):
+    empeno = get_empeno(db, empeno_id)
+    if not empeno or empeno.estado != models.EstadoEmpeno.rematado:
+        return None # Solo se puede vender lo que está rematado
+
+    # 1. Registrar entrada de dinero
+    movimiento = models.MovimientoCaja(
+        empeno_id=empeno.id,
+        usuario_id=1,
+        tipo_movimiento=models.TipoMovimiento.venta,
+        monto=precio_venta,
+        nota=f"Venta de artículo de remate"
+    )
+    db.add(movimiento)
+
+    # 2. Cambiar estado a Vendido
+    empeno.estado = models.EstadoEmpeno.vendido
+    
+    db.commit()
+    db.refresh(empeno)
+    return empeno

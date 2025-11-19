@@ -62,21 +62,25 @@
 
     <main class="content">
       
-      <div class="search-section">
-        <h3><span class="icon">&#128269;</span> Buscar Empeño</h3>
-        
-        <div class="search-form-content">
-          <form id="search-form" class="search-form">
-            <div class="input-group">
-              <label for="search-query">Buscar por Folio, Celular, Nombre o INE</label>
-              <input type="text" id="search-query" name="search-query" placeholder="Escribe tu término de búsqueda..." required>
-            </div>
-            <button type="submit" class="btn btn-primary">
-              <span class="icon">&#128269;</span> Buscar
-            </button>
-          </form>
-        </div>
+      <div class="search-bar">
+        <input type="text" id="busqueda-input" placeholder="Nombre, INE o Folio...">
+        <button type="button" id="btn-buscar" class="search-btn">Buscar</button>
       </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Acción</th>
+            <th>Folio</th>
+            <th>Artículo</th>
+            <th>Monto</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-resultados-body">
+          <tr><td colspan="5" style="text-align:center;">Usa el buscador...</td></tr>
+        </tbody>
+      </table>
 
       <div id="refrendo-details"> 
         <h3>
@@ -88,36 +92,37 @@
           <div class="form-grid">
             <div class="input-group">
               <label>Cliente</label>
-              <input type="text" value="Maria López" readonly>
+              <input type="text" id="info-cliente" placeholder="Seleccione un empeño..." readonly>
             </div>
             <div class="input-group">
               <label>Artículo</label>
-              <input type="text" value="Anillo de Oro 14k" readonly>
+              <input type="text" id="info-articulo" readonly>
             </div>
           </div>
 
           <h3 class="subsection-title">
             <span class="icon">&#128176;</span> Detalles del Préstamo
           </h3>
+
           <div class="form-grid cols-3">
             <div class="input-group">
               <label>Monto Préstamo ($)</label>
-              <input type="text" value="$5,000.00" readonly>
+              <input type="text" id="info-prestamo" readonly>
             </div>
             <div class="input-group">
-              <label>Monto Refrendo (Interés Base) ($)</label>
-              <input type="text" value="$500.00" readonly>
+              <label>Monto Refrendo (Interés) ($)</label>
+              <input type="text" id="info-interes" readonly>
             </div>
             <div class="input-group">
               <label>Fecha de Vencimiento</label>
-              <input type="date" value="2025-10-23" readonly>
+              <input type="text" id="info-vencimiento" readonly>
             </div>
             
             <div class="input-group">
               <label for="total-desempeno-base">Total Desempeño (Base)</label>
-              <input type="text" id="total-desempeno-base" name="total-desempeno-base" value="$5,500.00" readonly>
+              <input type="text" id="total-desempeno-base" name="total-desempeno-base" readonly>
             </div>
-            </div>
+          </div>  
 
           <h3 class="subsection-title">
             <span class="icon">&#128203;</span> Cálculo de Pago (Hoy: 30/10/2025)
@@ -126,36 +131,37 @@
           <div class="payment-summary">
             <div class="summary-item">
               <span>Monto del Préstamo (Capital):</span>
-              <span>$5,000.00</span>
+              <span id="resumen-capital">$0.00</span>
             </div>
+
             <div class="summary-item">
-              <span>Monto Refrendo (Interés):</span>
-              <span>$500.00</span>
+              <span>Interés (Refrendo):</span>
+              <span id="resumen-interes">$0.00</span>
             </div>
+
             <div class="summary-item info">
-              <span>Días de Gracia (Máx. 5 días):</span>
-              <span>5 días (Vencido el 28/10/2025)</span>
+              <span>Estado / Días de Retraso:</span>
+              <span id="resumen-dias">Al día</span>
             </div>
+
             <div class="summary-item penalty">
-              <span>Días de Retraso (después de gracia):</span>
-              <span>2 días (Día 29 y 30)</span>
+              <span>Multa / Recargos:</span>
+              <span id="resumen-multa">$0.00</span>
             </div>
-            <div class="summary-item penalty">
-              <span>Multa (10% del refrendo por día):</span>
-              <span>$100.00</span>
-            </div>
+
             <div class="summary-item-details">
-              <span>(Día 6: $50.00 + Día 7: $50.00)</span>
+              <span id="resumen-mensaje">(Selecciona un empeño para calcular)</span>
             </div>
+
             <div class="summary-total">
-              <span>TOTAL A PAGAR (DESEMPEÑO):</span>
-              <span>$5,600.00</span>
+              <span>TOTAL A PAGAR (LIQUIDACIÓN):</span>
+              <span id="resumen-total">$0.00</span>
             </div>
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn btn-secondary">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Confirmar Desempeño y Entregar</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='dash.html'">Cancelar</button>
+            <button type="submit" id="btn-pagar" class="btn btn-primary" disabled>Confirmar Desempeño</button>
           </div>
         </div> 
       </div>
@@ -164,6 +170,143 @@
   </div>
 
   <div class="overlay" id="overlay"></div>
-  <script src="dashboard.js"></script>
+  <script>
+    const token = localStorage.getItem('token_auto_empeno');
+    if (!token) window.location.href = 'login.html';
+
+    let empenoSeleccionadoId = null;
+
+    // --- 1. BUSCADOR ---
+    const btnBuscar = document.getElementById('btn-buscar');
+    const inputBusqueda = document.getElementById('busqueda-input');
+    const tbody = document.getElementById('tabla-resultados-body');
+
+    btnBuscar.addEventListener('click', async () => {
+        const q = inputBusqueda.value;
+        const res = await fetch(`http://localhost:8000/clientes/buscar?q=${q}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const clientes = await res.json();
+        
+        tbody.innerHTML = '';
+        if(clientes.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No encontrado</td></tr>';
+            return;
+        }
+
+        clientes.forEach(c => {
+            if(c.empenos) c.empenos.forEach(e => {
+                if(e.estado === 'Vigente' || e.estado === 'Vencido') {
+                    const tr = document.createElement('tr');
+                    const nombreCompleto = `${c.nombre} ${c.apellidos}`;
+                    
+                    // AQUÍ ESTÁ LA MAGIA: Pasamos nombre y artículo a la función
+                    tr.innerHTML = `
+                      <td>
+                          <button class="btn-select" 
+                              onclick="calcularLiquidacion(
+                                  ${e.id}, 
+                                  ${e.monto_prestamo}, 
+                                  '${e.fecha_vencimiento}', 
+                                  ${e.interes_mensual_pct},
+                                  '${nombreCompleto}',
+                                  '${e.marca_modelo}'
+                              )">
+                              Seleccionar
+                          </button>
+                      </td>
+                      <td>${e.id}</td>
+                      <td>${e.marca_modelo}</td>
+                      <td>$${e.monto_prestamo}</td>
+                      <td><span class="status status-${e.estado.toLowerCase()}">${e.estado}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+        });
+    });
+
+    // --- 2. FUNCIÓN DE CÁLCULO Y LLENADO DE DATOS ---
+    // Ahora recibimos nombreCliente y nombreArticulo
+    window.calcularLiquidacion = function(id, capital, fechaVencStr, tasaInteres, nombreCliente, nombreArticulo) {
+        empenoSeleccionadoId = id;
+
+        // A. LLENAR LOS CAMPOS VISUALES (Inputs de arriba)
+        document.getElementById('info-cliente').value = nombreCliente;
+        document.getElementById('info-articulo').value = nombreArticulo;
+        document.getElementById('info-prestamo').value = `$${capital.toFixed(2)}`;
+        document.getElementById('info-vencimiento').value = fechaVencStr;
+
+        // B. CÁLCULOS
+        const interes = capital * (tasaInteres / 100);
+        const totalBase = capital + interes;
+
+        // Llenar campos de dinero intermedios
+        document.getElementById('info-interes').value = `$${interes.toFixed(2)}`;
+        document.getElementById('total-desempeno-base').value = `$${totalBase.toFixed(2)}`;
+
+        // C. CALCULAR RECARGOS (Panel Derecho)
+        const hoy = new Date();
+        const fechaVenc = new Date(fechaVencStr + 'T00:00:00');
+        const diffTime = hoy - fechaVenc;
+        const diasRetraso = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+        
+        let multa = 0;
+        if (diasRetraso > 0) {
+            multa = diasRetraso * 15; // $15 por día de retraso
+            document.getElementById('resumen-dias').innerText = `${diasRetraso} días de retraso`;
+            document.getElementById('resumen-dias').style.color = 'red';
+        } else {
+            document.getElementById('resumen-dias').innerText = "Al corriente";
+            document.getElementById('resumen-dias').style.color = 'green';
+        }
+
+        // D. SUMA FINAL (Panel Derecho)
+        const totalPagar = totalBase + multa;
+
+        document.getElementById('resumen-capital').innerText = `$${capital.toFixed(2)}`;
+        document.getElementById('resumen-interes').innerText = `$${interes.toFixed(2)}`;
+        document.getElementById('resumen-multa').innerText = `$${multa.toFixed(2)}`;
+        document.getElementById('resumen-total').innerText = `$${totalPagar.toFixed(2)}`;
+        document.getElementById('resumen-mensaje').innerText = `Folio ${id} seleccionado.`;
+
+        // Activar botón
+        const btn = document.getElementById('btn-pagar');
+        btn.disabled = false;
+        btn.innerText = `Cobrar $${totalPagar.toFixed(2)} y Entregar Prenda`;
+    };
+
+    // --- 3. PAGAR ---
+    document.getElementById('btn-pagar').addEventListener('click', async (e) => {
+        e.preventDefault();
+        if(!empenoSeleccionadoId) return;
+        if(!confirm("¿Confirmas el desempeño?")) return;
+
+        try {
+            const res = await fetch(`http://localhost:8000/empenos/${empenoSeleccionadoId}/desempeno`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if(res.ok) {
+                alert("✅ ¡Desempeño exitoso!");
+                window.location.reload();
+            } else {
+                alert("Error al procesar");
+            }
+        } catch(err) {
+            console.error(err);
+            alert("Error de conexión");
+        }
+    });
+</script>
+
+  <style>
+      .btn-select {
+          background-color: #2a5a8a; color: white; border: none;
+          padding: 5px 10px; border-radius: 4px; cursor: pointer;
+      }
+      .btn-select:hover { background-color: #113b64; }
+  </style>
 </body>
 </html>

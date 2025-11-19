@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from typing import List # ¡IMPORTANTE! Para las listas
+import pydantic
 
 # Imports sin puntos para Docker
 from database import engine, get_db
@@ -124,3 +125,53 @@ def registrar_refrendo(id: int, db: Session = Depends(get_db), token: str = Depe
     empeno_actualizado = crud.refrendar_empeno(db, empeno_id=id)
     
     return {"mensaje": "Refrendo aplicado exitosamente", "nueva_fecha": empeno_actualizado.fecha_vencimiento}
+
+# --- Agrega esto al final de main.py ---
+
+@app.post("/empenos/{id}/reevaluo")
+def registrar_reevaluo(
+    id: int, 
+    datos: schemas.ReevaluoRequest, 
+    db: Session = Depends(get_db), 
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Ruta para procesar el Reevalúo.
+    """
+    # Llamamos a la función del CRUD
+    resultado = crud.procesar_reevaluo(
+        db, 
+        empeno_id=id, 
+        nuevo_prestamo=datos.nuevo_prestamo, 
+        nuevo_valuo=datos.nuevo_valuo, 
+        nuevo_interes=datos.nuevo_interes
+    )
+    
+    if not resultado:
+        raise HTTPException(status_code=404, detail="No se pudo procesar el reevalúo (¿Empeño no existe?)")
+    
+    return {"mensaje": "Reevalúo exitoso", "nuevo_monto": resultado.monto_prestamo}
+
+
+# --- RUTA PARA DESEMPEÑO (LIQUIDACIÓN) ---
+@app.post("/empenos/{id}/desempeno")
+def registrar_desempeno(id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    """
+    Endpoint para registrar que el cliente pagó todo y se llevó la prenda.
+    """
+    resultado = crud.procesar_desempeno(db, empeno_id=id)
+    
+    if not resultado:
+        raise HTTPException(status_code=404, detail="Empeño no encontrado")
+    
+    return {"mensaje": "Prenda liberada exitosamente", "estado": resultado.estado}
+
+class VentaRequest(pydantic.BaseModel):
+    precio_venta: float
+
+@app.post("/empenos/{id}/venta")
+def registrar_venta(id: int, datos: VentaRequest, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    resultado = crud.procesar_venta_remate(db, id, datos.precio_venta)
+    if not resultado:
+        raise HTTPException(status_code=400, detail="El artículo no está disponible para venta")
+    return {"mensaje": "Artículo vendido", "estado": resultado.estado}
