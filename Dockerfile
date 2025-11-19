@@ -6,12 +6,17 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# --- CAMBIO AQUÍ ---
+# 1. Actualizamos pip (ayuda a evitar errores de instalación)
+RUN pip install --upgrade pip
+
+# 2. Aumentamos el 'timeout' a 1000 segundos para que no se corte si tu internet va lento
+RUN pip install --default-timeout=1000 --no-cache-dir -r requirements.txt
+# -------------------
 
 COPY . .
 
-# --- NUEVA LÍNEA IMPORTANTE ---
-# Esto permite que 'import models' funcione aunque estemos ejecutando desde la carpeta raíz
 ENV PYTHONPATH="${PYTHONPATH}:/app/backend"
 
 EXPOSE 8000
