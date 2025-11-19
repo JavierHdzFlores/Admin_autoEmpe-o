@@ -109,3 +109,50 @@ def procesar_nuevo_empeno(db: Session, datos: schemas.NuevoEmpenoRequest):
     nuevo_empeno = create_empeno(db, datos.empeno, cliente_id=cliente_id)
     
     return nuevo_empeno
+
+# En backend/crud.py
+def buscar_clientes_general(db: Session, query_str: str):
+    """Busca por nombre, apellido, INE o TELÉFONO"""
+    busqueda = f"%{query_str}%" 
+    return db.query(models.Cliente).filter(
+        or_(
+            models.Cliente.nombre.ilike(busqueda),
+            models.Cliente.apellidos.ilike(busqueda),
+            models.Cliente.ine.ilike(busqueda),
+            models.Cliente.telefono.ilike(busqueda) # ¡Nuevo!
+        )
+    ).all()
+# ==========================================
+# OPERACIONES DE REFRENDO Y CAJA (Faltantes)
+# ==========================================
+
+def refrendar_empeno(db: Session, empeno_id: int, dias_extension: int = 30):
+    """
+    1. Extiende la fecha de vencimiento.
+    2. Si estaba vencido, lo regresa a 'Vigente'.
+    """
+    db_empeno = get_empeno(db, empeno_id)
+    if db_empeno:
+        # Lógica: Sumar días a la fecha que tenía
+        db_empeno.fecha_vencimiento = db_empeno.fecha_vencimiento + timedelta(days=dias_extension)
+        
+        # IMPORTANTE: Si pagan refrendo, el empeño revive a estado Vigente
+        db_empeno.estado = models.EstadoEmpeno.vigente
+        
+        db.commit()
+        db.refresh(db_empeno)
+    return db_empeno
+
+def create_movimiento(db: Session, movimiento: schemas.MovimientoCajaCreate, usuario_id: int):
+    """
+    Registra cualquier entrada de dinero (Refrendo, Desempeño, etc).
+    """
+    db_movimiento = models.MovimientoCaja(
+        **movimiento.model_dump(),
+        usuario_id=usuario_id # Viene del token del usuario logueado
+    )
+    db.add(db_movimiento)
+    db.commit()
+    db.refresh(db_movimiento)
+    return db_movimiento
+

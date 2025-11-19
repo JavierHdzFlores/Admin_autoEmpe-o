@@ -84,3 +84,43 @@ def obtener_resumen(db: Session = Depends(get_db), token: str = Depends(oauth2_s
 @app.get("/dashboard/tabla")
 def obtener_tabla_reciente(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     return crud.get_empenos_recientes_tabla(db)
+
+# En backend/main.py
+# --- RUTA DE BÚSQUEDA DE CLIENTES ---
+@app.get("/clientes/buscar", response_model=List[schemas.Cliente])
+def buscar_clientes(q: str, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    return crud.buscar_clientes_general(db, q)
+
+# --- RUTA PARA REGISTRAR REFRENDO (PAGO) ---
+@app.post("/empenos/{id}/refrendo")
+def registrar_refrendo(id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    """
+    1. Cobra el refrendo.
+    2. Extiende la fecha de vencimiento 30 días.
+    3. Reactiva el empeño a 'Vigente'.
+    """
+    # A. Buscamos el empeño
+    empeno = crud.get_empeno(db, empeno_id=id)
+    if not empeno:
+        raise HTTPException(status_code=404, detail="Empeño no encontrado")
+
+
+    # B. Calculamos monto (Por ahora fijo o calculado simple)
+    # En un sistema real, recibiríamos el monto exacto del frontend.
+    monto_cobrado = empeno.monto_prestamo * empeno.interes_mensual_pct / 100
+    
+    # C. Registramos el movimiento de dinero
+    movimiento = schemas.MovimientoCajaCreate(
+        tipo_movimiento=schemas.TipoMovimiento.refrendo,
+        monto=monto_cobrado,
+        empeno_id=id,
+        nota="Pago de Refrendo Mensual"
+    )
+    # Usamos un usuario ID fijo por ahora (o decodifica el token si quieres ser estricto)
+    # Para simplificar, asumiremos que el usuario ID 1 es el cajero.
+    crud.create_movimiento(db, movimiento, usuario_id=1)
+
+    # D. Extendemos la fecha y actualizamos estado
+    empeno_actualizado = crud.refrendar_empeno(db, empeno_id=id)
+    
+    return {"mensaje": "Refrendo aplicado exitosamente", "nueva_fecha": empeno_actualizado.fecha_vencimiento}

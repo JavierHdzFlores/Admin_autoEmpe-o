@@ -62,20 +62,10 @@
 
     <main class="content">
       
-      <div class="search-section">
-        <h3><span class="icon">&#128269;</span> Buscar Empeño</h3>
+      <div class="search-bar">
+        <input type="text" id="busqueda-input" placeholder="Ingrese celular o INE del cliente...">
         
-        <div class="search-form-content">
-          <form id="search-form" class="search-form">
-            <div class="input-group">
-              <label for="search-query">Buscar por Folio, Celular, Nombre o INE</label>
-              <input type="text" id="search-query" name="search-query" placeholder="Escribe tu término de búsqueda..." required>
-            </div>
-            <button type="submit" class="btn btn-primary">
-              <span class="icon">&#128269;</span> Buscar
-            </button>
-          </form>
-        </div>
+        <button type="button" id="btn-buscar" class="search-btn">Buscar Cliente</button>
       </div>
       
       <div id="refrendo-details">
@@ -88,11 +78,11 @@
           <div class="form-grid">
             <div class="input-group">
               <label>Cliente</label>
-              <input type="text" value="Maria López" readonly>
+              <input type="text" id="info-cliente" placeholder="Seleccione un empeño..." readonly>
             </div>
             <div class="input-group">
               <label>Artículo</label>
-              <input type="text" value="Anillo de Oro 14k" readonly>
+              <input type="text" id="info-articulo" readonly>
             </div>
           </div>
 
@@ -102,17 +92,18 @@
           <div class="form-grid cols-3">
             <div class="input-group">
               <label>Monto Préstamo ($)</label>
-              <input type="text" value="$5,000.00" readonly>
+              <input type="text" id="info-prestamo" readonly>
             </div>
             <div class="input-group">
               <label>Monto Refrendo (Interés Base) ($)</label>
-              <input type="text" value="$500.00" readonly>
+              <input type="text" id="info-interes" readonly>
             </div>
             <div class="input-group">
               <label>Fecha de Vencimiento</label>
-              <input type="date" value="2025-10-23" readonly>
+              <input type="date" id="info-vencimiento" readonly>
             </div>
           </div>
+        </div>
 
           <h3 class="subsection-title">
             <span class="icon">&#9881;</span> Acciones y Ajustes de Pago
@@ -138,39 +129,259 @@
           <div class="payment-summary">
             <div class="summary-item">
               <span>Monto Refrendo (Base):</span>
-              <span>$500.00</span>
+              <span id="resumen-base">$0.00</span>
             </div>
+
             <div class="summary-item info">
-              <span>Días de Gracia (Base 5 + Extra 2):</span>
-              <span>7 días (Nueva fecha límite: 30/10/2025)</span>
+              <span>Días de Gracia / Retraso:</span>
+              <span id="resumen-dias">0 días</span>
             </div>
+
             <div class="summary-item penalty">
-              <span>Días de Retraso (después de gracia):</span>
-              <span>0 días</span>
+              <span>Multa / Recargos:</span>
+              <span id="resumen-multa">$0.00</span>
             </div>
-            <div class="summary-item penalty">
-              <span>Multa (10% del refrendo por día):</span>
-              <span>$0.00</span>
-            </div>
+
             <div class="summary-item-details">
-              <span>(Pagando a tiempo gracias a los días extra)</span>
+              <span id="resumen-mensaje">(Selecciona un empeño para calcular)</span>
             </div>
+
             <div class="summary-total">
-              <span>TOTAL A PAGAR (Refrendo):</span>
-              <span>$500.00</span>
+              <span>TOTAL A PAGAR:</span>
+              <span id="resumen-total">$0.00</span>
             </div>
           </div>
+
+
           <div class="form-actions">
-            <button type="button" class="btn btn-secondary">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Registrar Pago / Abono</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='dash.html'">Cancelar</button>
+            <button type="submit" id="btn-pagar" class="btn btn-primary" disabled>Registrar Pago</button>
           </div>
         </div> 
       </div>
 
     </main>
-  </div>
-
+  <section class="content-placeholder">
+        <h2></h2>
+        <p>Resultados de clientes.</p>
+      <table class="loan-selection">
+          <thead>
+            <tr>
+              <th>Select</th> <th>Folio</th>
+              <th>Artículo</th>
+              <th>Vencimiento</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-resultados-body">
+            <tr>
+              <td colspan="5" style="text-align:center; color: #666;">
+                Usa el buscador para encontrar al cliente
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
   <div class="overlay" id="overlay"></div>
-  <script src="dashboard.js"></script>
+  <script>
+    const token = localStorage.getItem('token_auto_empeno');
+    if (!token) window.location.href = 'login.html';
+
+    // --- 1. LÓGICA DE BÚSQUEDA ---
+    const btnBuscar = document.getElementById('btn-buscar');
+    const inputBusqueda = document.getElementById('busqueda-input');
+    const tbody = document.getElementById('tabla-resultados-body');
+
+    btnBuscar.addEventListener('click', async () => {
+      const query = inputBusqueda.value.trim();
+      
+      if (!query) {
+        alert("Por favor escribe un nombre, teléfono o INE.");
+        return;
+      }
+
+      try {
+        // Llamamos al endpoint que acabamos de crear
+        const response = await fetch(`http://localhost:8000/clientes/buscar?q=${query}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const clientes = await response.json();
+          tbody.innerHTML = ''; // Limpiar tabla
+
+          if (clientes.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No se encontraron clientes.</td></tr>';
+            return;
+          }
+
+          // Por cada cliente encontrado, mostramos sus empeños
+          // NOTA: En el futuro esto debería ser una doble búsqueda, 
+          // pero por ahora mostraremos los empeños de los clientes encontrados.
+          
+          clientes.forEach(cliente => {
+            // Si el cliente tiene empeños, los mostramos
+            if(cliente.empenos && cliente.empenos.length > 0) {
+                cliente.empenos.forEach(empeno => {
+                    // Solo mostramos empeños ACTIVOS (Vigente o Vencido)
+                    if (empeno.estado === 'Vigente' || empeno.estado === 'Vencido') {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>
+                                <button class="btn-select" onclick="seleccionarEmpeno(${empeno.id}, '${empeno.fecha_vencimiento}', ${empeno.monto_prestamo})">
+                                    Seleccionar
+                                </button>
+                            </td>
+                            <td>${empeno.id}</td>
+                            <td>${empeno.marca_modelo} <br><small>(${cliente.nombre} ${cliente.apellidos})</small></td>
+                            <td>${empeno.fecha_vencimiento}</td>
+                            <td><span class="status status-${empeno.estado.toLowerCase()}">${empeno.estado}</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                      
+                        // En la parte donde creamos el 'tr' dentro del loop:
+                        const nombreCompleto = `${cliente.nombre} ${cliente.apellidos}`;
+
+                        tr.innerHTML = `
+                            <td>
+                                <button class="btn-select" 
+                                    onclick="seleccionarEmpeno(
+                                        ${empeno.id}, 
+                                        '${empeno.fecha_vencimiento}', 
+                                        ${empeno.monto_prestamo}, 
+                                        '${nombreCompleto}', 
+                                        '${empeno.marca_modelo}'
+                                    )">
+                                    Seleccionar
+                                </button>
+                            </td>
+                            <td>${empeno.id}</td>
+                            <td>${empeno.marca_modelo} <br><small>(${nombreCompleto})</small></td>
+                            <td>${empeno.fecha_vencimiento}</td>
+                            <td><span class="status status-${empeno.estado.toLowerCase()}">${empeno.estado}</span></td>
+                        `;
+                    
+                      }
+                });
+            }
+          });
+          
+          if (tbody.innerHTML === '') {
+              tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">El cliente existe pero no tiene empeños activos.</td></tr>';
+          }
+
+        } else {
+          alert("Error al buscar cliente.");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Error de conexión.");
+      }
+    });
+
+    // --- 2. LÓGICA DE SELECCIÓN (Placeholder) ---
+   
+   // Variables globales para saber qué estamos pagando
+  let empenoSeleccionadoId = null;
+  let montoAPagar = 0;
+
+  // --- 2. LÓGICA DE SELECCIÓN Y CÁLCULOS ---
+  // --- NUEVA FUNCIÓN SELECCIONAR (Con datos visuales) ---
+  function seleccionarEmpeno(id, fechaVencimientoStr, montoPrestamo, nombreCliente, nombreArticulo) {
+      // 1. Guardamos el ID para pagar después
+      empenoSeleccionadoId = id;
+
+      // 2. LLENAR LOS CAMPOS VISUALES (Lo que pediste)
+      document.getElementById('info-cliente').value = nombreCliente;
+      document.getElementById('info-articulo').value = nombreArticulo;
+      document.getElementById('info-prestamo').value = `$${montoPrestamo.toFixed(2)}`;
+      document.getElementById('info-vencimiento').value = fechaVencimientoStr;
+      
+      // Calculamos el interés (10%) para mostrarlo
+      const interesBase = montoPrestamo * 0.10;
+      document.getElementById('info-interes').value = `$${interesBase.toFixed(2)}`;
+
+      // 3. CÁLCULOS DEL PANEL DERECHO (Esto sigue igual que antes)
+      const hoy = new Date();
+      const fechaVenc = new Date(fechaVencimientoStr + 'T00:00:00');
+      
+      const diferenciaTiempo = hoy - fechaVenc;
+      const diasDiferencia = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
+      
+      let diasRetraso = 0;
+      let multa = 0;
+
+      if (diasDiferencia > 0) {
+          diasRetraso = diasDiferencia;
+          multa = diasRetraso * 10; // $10 por día de retraso
+      }
+
+      montoAPagar = interesBase + multa;
+
+      // Actualizar panel derecho
+      document.getElementById('resumen-base').innerText = `$${interesBase.toFixed(2)}`;
+      document.getElementById('resumen-dias').innerText = diasRetraso > 0 ? `${diasRetraso} días de retraso` : 'Al día';
+      
+      const spanDias = document.getElementById('resumen-dias');
+      spanDias.style.color = diasRetraso > 0 ? 'red' : 'green';
+
+      document.getElementById('resumen-multa').innerText = `$${multa.toFixed(2)}`;
+      document.getElementById('resumen-total').innerText = `$${montoAPagar.toFixed(2)}`;
+      document.getElementById('resumen-mensaje').innerText = `Folio ${id} seleccionado.`;
+
+      // Habilitar botón
+      const btnPagar = document.getElementById('btn-pagar');
+      btnPagar.disabled = false;
+      btnPagar.innerText = `Cobrar $${montoAPagar.toFixed(2)}`;
+  }
+  // --- 3. LÓGICA DEL BOTÓN PAGAR ---
+  const btnPagar = document.getElementById('btn-pagar');
+  
+  btnPagar.addEventListener('click', async (e) => {
+      e.preventDefault(); // Evita recargas
+
+      if (!empenoSeleccionadoId) return;
+
+      if(!confirm(`¿Confirmas recibir el pago de $${montoAPagar.toFixed(2)}?`)) return;
+
+      try {
+          const response = await fetch(`http://localhost:8000/empenos/${empenoSeleccionadoId}/refrendo`, {
+              method: 'POST',
+              headers: { 
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({}) // Mandamos body vacío por ahora
+          });
+
+          if (response.ok) {
+              const data = await response.json();
+              alert(`✅ ¡Pago registrado con éxito!\nNueva fecha de vencimiento: ${data.nueva_fecha}`);
+              window.location.reload(); // Recargamos para limpiar
+          } else {
+              alert("Error al registrar el pago.");
+          }
+      } catch (error) {
+          console.error(error);
+          alert("Error de conexión");
+      }
+  }); 
+  </script>
+
+  <style>
+      /* Un poco de estilo para el botón de seleccionar */
+      .btn-select {
+          background-color: #2a5a8a;
+          color: white;
+          border: none;
+          padding: 5px 10px;
+          cursor: pointer;
+          border-radius: 4px;
+      }
+      .btn-select:hover {
+          background-color: #113b64;
+      }
+  </style>
 </body>
+
 </html>
