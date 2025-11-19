@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from datetime import timedelta # CORRECCIÓN 2: Quitamos 'date' porque no se usa
-import models, schemas, security # CORRECCIÓN 1: Quitamos el punto (.) inicial
+from datetime import date, timedelta
+# IMPORTANTE: Sin puntos para que Docker lo lea bien
+import models, schemas, security 
 
 # ==========================================
-# USUARIOS (Login y Gestión)
+# USUARIOS
 # ==========================================
-
 def get_user(db: Session, user_id: int):
     return db.query(models.Usuario).filter(models.Usuario.id == user_id).first()
 
@@ -14,7 +14,6 @@ def get_user_by_username(db: Session, username: str):
     return db.query(models.Usuario).filter(models.Usuario.usuario == username).first()
 
 def create_user(db: Session, user: schemas.UsuarioCreate):
-    """Crea un nuevo usuario (empleado/admin) en la BD con hash."""
     hashed_password = security.get_password_hash(user.password)
     db_user = models.Usuario(
         usuario=user.usuario,
@@ -27,106 +26,45 @@ def create_user(db: Session, user: schemas.UsuarioCreate):
     db.refresh(db_user)
     return db_user
 
-
 # ==========================================
 # CLIENTES
 # ==========================================
-
-def get_cliente(db: Session, cliente_id: int):
-    return db.query(models.Cliente).filter(models.Cliente.id == cliente_id).first()
-
-# NUEVA FUNCIÓN: Búsqueda general para tu barra de búsqueda
-def buscar_clientes_general(db: Session, query_str: str):
-    """Busca por nombre, apellido o INE que contenga el texto query_str"""
-    busqueda = f"%{query_str}%" # Comodines para búsqueda parcial
-    return db.query(models.Cliente).filter(
-        or_(
-            models.Cliente.nombre.ilike(busqueda),
-            models.Cliente.apellidos.ilike(busqueda),
-            models.Cliente.ine.ilike(busqueda)
-        )
-    ).all()
-
 def get_cliente_by_ine(db: Session, ine: str):
-    return db.query(models.Cliente).filter(models.Cliente.ine == ine).first()
+    # Limpiamos espacios en blanco por si acaso
+    return db.query(models.Cliente).filter(models.Cliente.ine == ine.strip()).first()
 
 def create_cliente(db: Session, cliente: schemas.ClienteCreate):
-    # CORRECCIÓN 2: Usamos model_dump() en lugar de dict() para Pydantic v2
+    # Usamos model_dump() porque estamos en Pydantic V2
     db_cliente = models.Cliente(**cliente.model_dump())
     db.add(db_cliente)
     db.commit()
     db.refresh(db_cliente)
     return db_cliente
 
-
 # ==========================================
 # EMPEÑOS
 # ==========================================
-
 def get_empeno(db: Session, empeno_id: int):
     return db.query(models.Empeno).filter(models.Empeno.id == empeno_id).first()
 
-def get_empenos_por_cliente(db: Session, cliente_id: int):
-    """Recupera todo el historial de un cliente"""
-    return db.query(models.Empeno).filter(models.Empeno.cliente_id == cliente_id).all()
-
 def create_empeno(db: Session, empeno: schemas.EmpenoCreate, cliente_id: int):
-    """Registra un nuevo artículo empeñado."""
     db_empeno = models.Empeno(
         **empeno.model_dump(), 
         cliente_id=cliente_id,
-        estado=models.EstadoEmpeno.vigente # Siempre nace vigente
+        estado=models.EstadoEmpeno.vigente
     )
     db.add(db_empeno)
     db.commit()
     db.refresh(db_empeno)
     return db_empeno
 
-def update_empeno_estado(db: Session, empeno_id: int, nuevo_estado: models.EstadoEmpeno):
-    """Actualiza solo el estado (ej. al Desempeñar o Rematar)."""
-    db_empeno = get_empeno(db, empeno_id)
-    if db_empeno:
-        db_empeno.estado = nuevo_estado
-        db.commit()
-        db.refresh(db_empeno)
-    return db_empeno
-
-def refrendar_empeno(db: Session, empeno_id: int, dias_extension: int = 30):
-    """
-    1. Extiende la fecha de vencimiento.
-    2. Si estaba vencido, lo regresa a 'Vigente'.
-    """
-    db_empeno = get_empeno(db, empeno_id)
-    if db_empeno:
-        # Lógica: Sumar días a la fecha que tenía
-        db_empeno.fecha_vencimiento = db_empeno.fecha_vencimiento + timedelta(days=dias_extension)
-        
-        # IMPORTANTE: Si pagan refrendo, el empeño revive a estado Vigente
-        db_empeno.estado = models.EstadoEmpeno.vigente
-        
-        db.commit()
-        db.refresh(db_empeno)
-    return db_empeno
-
+def get_todos_los_empenos(db: Session):
+    return db.query(models.Empeno).order_by(models.Empeno.fecha_empeno.desc()).all()
 
 # ==========================================
-# MOVIMIENTOS DE CAJA (Pagos)
+# DASHBOARD Y ESTADÍSTICAS
 # ==========================================
-
-def create_movimiento(db: Session, movimiento: schemas.MovimientoCajaCreate, usuario_id: int):
-    """Registra entrada de dinero (Refrendo, Desempeño, etc)."""
-    db_movimiento = models.MovimientoCaja(
-        **movimiento.model_dump(),
-        usuario_id=usuario_id 
-    )
-    db.add(db_movimiento)
-    db.commit()
-    db.refresh(db_movimiento)
-    return db_movimiento
-
-# --- ESTADÍSTICAS PARA DASHBOARD ---
 def get_dashboard_stats(db: Session):
-    """Cuenta los registros para llenar las tarjetas del home"""
     return {
         "total_empenos": db.query(models.Empeno).count(),
         "activos": db.query(models.Empeno).filter(models.Empeno.estado == models.EstadoEmpeno.vigente).count(),
@@ -134,22 +72,40 @@ def get_dashboard_stats(db: Session):
         "remate": db.query(models.Empeno).filter(models.Empeno.estado == models.EstadoEmpeno.rematado).count()
     }
 
-# --- TABLA DEL DASHBOARD ---
 def get_empenos_recientes_tabla(db: Session, limite: int = 5):
-    """
-    Busca los últimos 5 empeños registrados para la tabla del inicio.
-    """
-    # 1. Buscamos ordenando por ID descendente (los más nuevos primero)
     empenos = db.query(models.Empeno).order_by(models.Empeno.id.desc()).limit(limite).all()
-    
     resultado = []
     for e in empenos:
-        # 2. Creamos un diccionario simple para cada fila
+        # Unimos nombre con seguridad (por si apellidos viene vacío)
+        nombre_completo = f"{e.cliente.nombre} {e.cliente.apellidos}" if e.cliente else "Cliente Desconocido"
+        
         resultado.append({
-            "cliente": f"{e.cliente.nombre} {e.cliente.apellidos}", # Unimos nombre
-            "accion": "Nuevo Empeño",  # Por ahora todo será "Nuevo Empeño"
+            "cliente": nombre_completo,
+            "accion": "Nuevo Empeño",
             "articulo": e.marca_modelo,
             "monto": e.monto_prestamo,
             "fecha": e.fecha_empeno
         })
     return resultado
+
+# ==========================================
+# LÓGICA MAESTRA: NUEVO EMPEÑO
+# ==========================================
+def procesar_nuevo_empeno(db: Session, datos: schemas.NuevoEmpenoRequest):
+    # 1. Verificamos si el cliente existe por INE
+    cliente_ine = datos.cliente.ine.strip()
+    cliente_existente = get_cliente_by_ine(db, ine=cliente_ine)
+    
+    if cliente_existente:
+        print(f"Cliente encontrado: {cliente_existente.nombre}")
+        cliente_id = cliente_existente.id
+    else:
+        print("Creando cliente nuevo...")
+        nuevo_cliente = create_cliente(db, datos.cliente)
+        cliente_id = nuevo_cliente.id
+
+    # 2. Creamos el empeño vinculado
+    print(f"Registrando empeño para cliente ID: {cliente_id}")
+    nuevo_empeno = create_empeno(db, datos.empeno, cliente_id=cliente_id)
+    
+    return nuevo_empeno

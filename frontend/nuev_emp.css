@@ -470,3 +470,10 @@ table tbody tr:nth-child(even) {
   cursor: not-allowed;      /* Muestra un cursor de "no permitido" */
   opacity: 0.7;
 }
+/* Pega esto en tu CSS */
+input[readonly] {
+  background-color: #e9ecef;
+  color: #495057;
+  cursor: not-allowed;
+  font-weight: bold;
+}

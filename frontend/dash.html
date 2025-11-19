@@ -131,7 +131,8 @@
     // Función para cargar datos del Dashboard
     async function cargarDashboard() {
         const token = localStorage.getItem('token_auto_empeno');
-        
+        console.log("Token recuperado:", token);
+
         try {
             // 1. Cargar contadores (Tarjetas)
             const resStats = await fetch('http://localhost:8000/dashboard/resumen', {

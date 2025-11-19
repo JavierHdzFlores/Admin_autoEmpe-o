@@ -125,7 +125,7 @@
           <div class="form-grid cols-3">
             <div class="input-group">
               <label for="prestamo-valuo">Valor de Valúo ($)</label>
-              <input type="number" id="prestamo-valuo" name="prestamo-valuo" step="0.01" required>
+              <input type="number" id="articulo-avaluo" name="prestamo-valuo" step="0.01" required>
             </div>
             <div class="input-group">
               <label for="prestamo-monto">Monto del Préstamo ($)</label>
@@ -168,6 +168,127 @@
 
   <div class="overlay" id="overlay"></div>
 
-  <script src="dashboard.js"></script>
+  <script>
+    // 1. Verificar Token
+    const token = localStorage.getItem('token_auto_empeno');
+    if (!token) {
+        alert("Sesión expirada. Volviendo al login.");
+        window.location.href = 'login.html';
+    }
+
+    // 2. Referencias para cálculos (Si fallan aquí, no es crítico para enviar, pero sí para la UI)
+    const inputMonto = document.getElementById('prestamo-monto');
+    const inputInteres = document.getElementById('prestamo-interes');
+    const inputFechaInicio = document.getElementById('fecha-empeno');
+    
+    // --- FUNCIÓN DE CÁLCULOS ---
+    function calcularTotales() {
+      if(!inputMonto || !inputInteres) return; // Evitar errores si faltan
+
+      const monto = parseFloat(inputMonto.value) || 0;
+      const interesPct = parseFloat(inputInteres.value) || 0;
+      const montoInteres = monto * (interesPct / 100);
+      const total = monto + montoInteres;
+
+      // Fechas
+      if (inputFechaInicio && inputFechaInicio.value) {
+        const fechaObj = new Date(inputFechaInicio.value + 'T00:00:00');
+        fechaObj.setDate(fechaObj.getDate() + 30);
+        const fechaRefrendo = document.getElementById('fecha-refrendo');
+        if(fechaRefrendo) fechaRefrendo.value = fechaObj.toISOString().split('T')[0];
+      }
+
+      const outRefrendo = document.getElementById('monto-refrendo');
+      const outTotal = document.getElementById('total-desempeno');
+      
+      if(outRefrendo) outRefrendo.value = montoInteres.toFixed(2);
+      if(outTotal) outTotal.value = total.toFixed(2);
+    }
+
+    // Listeners para cálculos
+    if(inputMonto) inputMonto.addEventListener('input', calcularTotales);
+    if(inputInteres) inputInteres.addEventListener('input', calcularTotales);
+    if(inputFechaInicio) inputFechaInicio.addEventListener('change', calcularTotales);
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+      const hoy = new Date().toISOString().split('T')[0];
+      if(inputFechaInicio) {
+          inputFechaInicio.value = hoy;
+          calcularTotales();
+      }
+    });
+
+
+    // --- 3. AQUÍ ESTÁ LA MAGIA (GET VAL SEGURO) ---
+    // Esta función intenta buscar el ID. Si no lo encuentra, TE AVISA con una alerta.
+    function getVal(id) {
+        const elemento = document.getElementById(id);
+        if (!elemento) {
+            const mensaje = `❌ ERROR FATAL: Falta el ID="${id}" en tu HTML.`;
+            console.error(mensaje);
+            alert(mensaje + "\n\nRevisa que hayas escrito el id='...' correctamente en el input.");
+            throw new Error(mensaje); // Detenemos el código aquí
+        }
+        return elemento.value;
+    }
+
+    // --- 4. ENVÍO DEL FORMULARIO ---
+    const form = document.querySelector('form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); 
+
+      try {
+          console.log("Recolectando datos...");
+
+          // Usamos getVal para que nos "acuse" qué falta
+          const payload = {
+            cliente: {
+              nombre: getVal('cliente-nombre'),
+              apellidos: getVal('cliente-apellidos'),
+              telefono: getVal('cliente-telefono'),
+              ine: getVal('cliente-ine'),
+              direccion: getVal('cliente-direccion')
+            },
+            empeno: {
+              categoria: getVal('articulo-categoria'),
+              marca_modelo: getVal('articulo-marca'),
+              descripcion: getVal('articulo-descripcion'),
+              num_serie_peso: getVal('articulo-serie'),
+              observaciones: getVal('articulo-observaciones'),
+              valor_valuo: parseFloat(getVal('articulo-avaluo')) || 0,
+              monto_prestamo: parseFloat(getVal('prestamo-monto')) || 0,
+              interes_mensual_pct: parseFloat(getVal('prestamo-interes')) || 10,
+              fecha_empeno: getVal('fecha-empeno'),
+              fecha_vencimiento: getVal('fecha-refrendo')
+            }
+          };
+
+          console.log("JSON Listo:", payload);
+
+          const response = await fetch('http://localhost:8000/empenos/nuevo', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(payload)
+          });
+
+          if (response.ok) {
+              const data = await response.json();
+              alert(`¡ÉXITO! Empeño guardado. Folio: ${data.id}`);
+              window.location.href = 'clientes.html';
+          } else {
+              const err = await response.json();
+              alert("Error del servidor: " + (err.detail || JSON.stringify(err)));
+          }
+
+      } catch (error) {
+          console.error("Proceso detenido:", error);
+          // No necesitamos alertar aquí porque getVal ya alertó arriba
+      }
+    });
+  </script>
 </body>
 </html>

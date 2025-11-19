@@ -44,7 +44,7 @@
     </nav>
 
     <div class="sidebar-footer">
-      <a href="index.html" class="logout-button">
+      <a href="login.html" class="logout-button">
         <span class="icon">&#128682;</span> Cerrar Sesión
       </a>
     </div>
@@ -193,6 +193,81 @@
   </div>
 
   <div class="overlay" id="overlay"></div>
-  <script src="dashboard.js"></script>
+  <script>
+    // --- 1. SEGURIDAD: Verificar si hay token ---
+    const token = localStorage.getItem('token_auto_empeno');
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    // --- 2. LÓGICA DE CERRAR SESIÓN (LOGOUT) ---
+    const btnLogout = document.querySelector('.logout-button');
+    
+    if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+            e.preventDefault(); // ¡Importante! Evita que el enlace actúe normal
+            
+            // Borramos la llave
+            localStorage.removeItem('token_auto_empeno');
+            
+            // Redirigimos al login
+            window.location.href = 'login.html';
+        });
+    }
+
+    // --- 3. CARGAR TABLA DE CLIENTES/EMPEÑOS ---
+    async function cargarTabla() {
+      try {
+        const response = await fetch('http://localhost:8000/empenos/todos', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const empenos = await response.json();
+          
+          // Buscamos el cuerpo de la tabla
+          // ¡Asegúrate de ponerle id="tabla-clientes-body" a tu <tbody> en el HTML!
+          const tbody = document.querySelector('tbody'); 
+          tbody.innerHTML = ''; // Limpiamos los datos de ejemplo
+
+          if (empenos.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay registros aún.</td></tr>';
+              return;
+          }
+
+          // Dibujamos cada fila con datos reales
+          empenos.forEach(empeno => {
+            const fila = document.createElement('tr');
+            
+            // Nota: empeno.fecha_vencimiento viene como YYYY-MM-DD
+            fila.innerHTML = `
+              <td>${empeno.cliente_id}</td> 
+              <td>${empeno.id}</td>
+              <td>${empeno.marca_modelo}</td>
+              <td>$${empeno.monto_prestamo}</td>
+              <td>${empeno.fecha_empeno}</td>
+              <td>${empeno.fecha_vencimiento}</td>
+              <td><span class="status status-${empeno.estado.toLowerCase()}">${empeno.estado}</span></td>
+            `;
+            tbody.appendChild(fila);
+          });
+
+        } else {
+          console.error("Error del servidor:", response.status);
+          if(response.status === 401) {
+              localStorage.removeItem('token_auto_empeno');
+              window.location.href = 'login.html';
+          }
+        }
+      } catch (error) {
+        console.error("Error de conexión:", error);
+      }
+    }
+
+    // Ejecutar al cargar la página
+    document.addEventListener('DOMContentLoaded', cargarTabla);
+  </script>
 </body>
 </html>
