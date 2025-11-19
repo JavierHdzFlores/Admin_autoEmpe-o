@@ -64,26 +64,26 @@
       
       <section class="stats-cards">
         <div class="card">
-          <h3>Total de Empeños </h3>
-          <p class="stat-number">204</p>
+          <h3>Total de Empeños</h3>
+          <p class="stat-number" id="stat-total">Cargando...</p>
         </div>
         <div class="card">
           <h3>Total de Empeños Activos</h3>
-          <p class="stat-number">142</p>
+          <p class="stat-number" id="stat-activos">Cargando...</p>
         </div>
         <div class="card">
           <h3>Clientes Registrados</h3>
-          <p class="stat-number">89</p>
+          <p class="stat-number" id="stat-clientes">Cargando...</p>
         </div>
         <div class="card">
           <h3>Artículos en Remate</h3>
-          <p class="stat-number">12</p>
+          <p class="stat-number" id="stat-remate">Cargando...</p>
         </div>
       </section>
 
       <section class="content-placeholder">
         <h2>Acciones Rápidas</h2>
-        <p>Aquí irá el formulario o la tabla principal. Por ejemplo, en la página "Nuevo Empeño", aquí aparecerá el formulario para registrar un nuevo cliente y su artículo.</p>
+        <p>Clientes recientes.</p>
         <table>
           <thead>
             <tr>
@@ -94,29 +94,8 @@
               <th>Fecha</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>Juan Pérez</td>
-              <td>Refrendo</td>
-              <td>Reloj de Oro</td>
-              <td>$1,500.00</td>
-              <td>30/10/2025</td>
-            </tr>
-            <tr>
-              <td>Maria López</td>
-              <td>Nuevo Empeño</td>
-              <td>Laptop HP</td>
-              <td>$5,000.00</td>
-              <td>29/10/2025</td>
-            </tr>
-            <tr>
-              <td>Carlos Sánchez</td>
-              <td>Desempeño</td>
-              <td>Anillo Diamante</td>
-              <td>$2,200.00</td>
-              <td>29/10/2025</td>
-            </tr>
-          </tbody>
+          <tbody id="tabla-acciones-body">
+            </tbody>
         </table>
       </section>
 
@@ -125,6 +104,81 @@
 
   <div class="overlay" id="overlay"></div>
 
-  <script src="dashboard.js"></script>
+  <script>
+    // Lógica para CERRAR SESIÓN
+    const btnLogout = document.querySelector('.logout-button');
+
+    if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+            e.preventDefault(); // Evita que el enlace navegue solo
+            
+            // 1. Borramos la llave del navegador
+            localStorage.removeItem('token_auto_empeno');
+            
+            // 2. (Opcional) Avisamos al usuario
+            alert('Sesión cerrada correctamente');
+
+            // 3. Redirigimos al Login
+            window.location.href = 'login.html';
+        });
+    }
+
+    // Lógica de PROTECCIÓN (Si no tienes llave, ¡fuera de aquí!)
+    const token = localStorage.getItem('token_auto_empeno');
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+    // Función para cargar datos del Dashboard
+    async function cargarDashboard() {
+        const token = localStorage.getItem('token_auto_empeno');
+        
+        try {
+            // 1. Cargar contadores (Tarjetas)
+            const resStats = await fetch('http://localhost:8000/dashboard/resumen', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (resStats.ok) {
+                const data = await resStats.json();
+                document.getElementById('stat-total').innerText = data.total_empenos;
+                document.getElementById('stat-activos').innerText = data.activos;
+                document.getElementById('stat-clientes').innerText = data.clientes;
+                document.getElementById('stat-remate').innerText = data.remate;
+            }
+
+            // 2. Cargar Tabla de Acciones Rápidas (NUEVO)
+            const resTabla = await fetch('http://localhost:8000/dashboard/tabla', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (resTabla.ok) {
+                const filas = await resTabla.json();
+                const tbody = document.getElementById('tabla-acciones-body');
+                tbody.innerHTML = ''; // Limpiar tabla
+
+                if (filas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sin movimientos recientes</td></tr>';
+                } else {
+                    filas.forEach(fila => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${fila.cliente}</td>
+                            <td><span class="status status-vigente">${fila.accion}</span></td>
+                            <td>${fila.articulo}</td>
+                            <td>$${fila.monto}</td>
+                            <td>${fila.fecha}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            }
+
+        } catch (error) {
+            console.error('Error cargando dashboard:', error);
+        }
+    }
+    // Ejecutar cuando cargue la página
+    document.addEventListener('DOMContentLoaded', cargarDashboard);
+  </script>
 </body>
 </html>

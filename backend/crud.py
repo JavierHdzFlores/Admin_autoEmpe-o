@@ -123,3 +123,33 @@ def create_movimiento(db: Session, movimiento: schemas.MovimientoCajaCreate, usu
     db.commit()
     db.refresh(db_movimiento)
     return db_movimiento
+
+# --- ESTADÍSTICAS PARA DASHBOARD ---
+def get_dashboard_stats(db: Session):
+    """Cuenta los registros para llenar las tarjetas del home"""
+    return {
+        "total_empenos": db.query(models.Empeno).count(),
+        "activos": db.query(models.Empeno).filter(models.Empeno.estado == models.EstadoEmpeno.vigente).count(),
+        "clientes": db.query(models.Cliente).count(),
+        "remate": db.query(models.Empeno).filter(models.Empeno.estado == models.EstadoEmpeno.rematado).count()
+    }
+
+# --- TABLA DEL DASHBOARD ---
+def get_empenos_recientes_tabla(db: Session, limite: int = 5):
+    """
+    Busca los últimos 5 empeños registrados para la tabla del inicio.
+    """
+    # 1. Buscamos ordenando por ID descendente (los más nuevos primero)
+    empenos = db.query(models.Empeno).order_by(models.Empeno.id.desc()).limit(limite).all()
+    
+    resultado = []
+    for e in empenos:
+        # 2. Creamos un diccionario simple para cada fila
+        resultado.append({
+            "cliente": f"{e.cliente.nombre} {e.cliente.apellidos}", # Unimos nombre
+            "accion": "Nuevo Empeño",  # Por ahora todo será "Nuevo Empeño"
+            "articulo": e.marca_modelo,
+            "monto": e.monto_prestamo,
+            "fecha": e.fecha_empeno
+        })
+    return resultado

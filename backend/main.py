@@ -74,3 +74,12 @@ def read_users_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get
     # Decodificamos el token para saber quién es
     # (Aquí simplificamos, en producción validamos más cosas)
     return crud.get_user_by_username(db, username=token) # Ojo: esto requiere lógica de decodificación en security.py
+# --- RUTA PARA DATOS DEL DASHBOARD ---
+@app.get("/dashboard/resumen")
+def obtener_resumen(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    # Nota: Agregamos 'token' para obligar a que solo usuarios logueados vean esto
+    return crud.get_dashboard_stats(db)
+
+@app.get("/dashboard/tabla")
+def obtener_tabla_reciente(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    return crud.get_empenos_recientes_tabla(db)

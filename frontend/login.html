@@ -54,40 +54,61 @@
   </div>
 
   <script>
-  const form = document.getElementById('login-form');
+  const loginForm = document.getElementById('login-form');
+  const errorMessage = document.getElementById('error-message');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Evita que la página se recargue
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); // 1. Evita que la página se recargue sola
 
-    const formData = new FormData(form);
-    // FastAPI espera los datos de login como 'x-www-form-urlencoded', no como JSON directo
-    const data = new URLSearchParams(formData);
+    // 2. Capturamos los datos del formulario
+    const formData = new FormData(loginForm);
+    const usuario = formData.get('usuario');
+    const contrasena = formData.get('contrasena');
+
+    // 3. "Traducimos" al formato que pide FastAPI (username / password)
+    const datosParaEnviar = new URLSearchParams();
+    datosParaEnviar.append('username', usuario);
+    datosParaEnviar.append('password', contrasena);
 
     try {
-      // Intentamos conectar con tu API local
+      // 4. Enviamos la petición al Backend
       const response = await fetch('http://localhost:8000/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: data
+        body: datosParaEnviar
       });
 
       if (response.ok) {
+        // --- LOGIN EXITOSO ---
         const result = await response.json();
-        // Guardamos el token en el navegador
-        localStorage.setItem('token', result.access_token);
-        alert('¡Login Exitoso! Bienvenido.');
         
-        // Aquí redirigiríamos al dashboard
-        // window.location.href = 'dash.html'; 
+        // A. Guardamos la llave (Token) en el navegador
+        localStorage.setItem('token_auto_empeno', result.access_token);
+        
+        // B. Ocultamos mensaje de error si estaba visible
+        errorMessage.style.display = 'none';
+        errorMessage.style.color = 'green';
+        errorMessage.innerText = '¡Bienvenido! Redirigiendo...';
+        errorMessage.style.display = 'block';
+
+        // C. Redirigimos a la página principal (Clientes)
+        setTimeout(() => {
+            window.location.href = 'dash.html'; 
+        }, 1000);
+
       } else {
-        alert('Error: Usuario o contraseña incorrectos');
+        // --- ERROR DE CREDENCIALES ---
+        errorMessage.innerText = 'Usuario o contraseña incorrectos.';
+        errorMessage.style.display = 'block';
       }
 
     } catch (error) {
+      // --- ERROR DE CONEXIÓN (Si el servidor está apagado) ---
       console.error('Error:', error);
-      alert('No se pudo conectar con el servidor.');
+      errorMessage.innerText = 'No se pudo conectar con el servidor.';
+      errorMessage.style.display = 'block';
     }
   });
 </script>
