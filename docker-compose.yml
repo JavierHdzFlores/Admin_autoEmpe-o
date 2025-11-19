@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # --- SERVICIO DE BASE DE DATOS ---
+  db:
+    image: mysql:8.0
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root030204   # Debe coincidir con la app
+      MYSQL_DATABASE: auto_empeno_db
+    ports:
+      - "3306:3306" # Te permite ver la BD desde tu PC (Workbench/DBeaver)
+    volumes:
+      - mysql_data:/var/lib/mysql # ¡Importante! Guarda los datos si apagas docker
+
+  # --- SERVICIO DE TU APP (BACKEND) ---
+  backend:
+    build: .
+    container_name: fastapi_app
+    restart: always
+    depends_on:
+      - db # Espera a que la BD inicie
+    ports:
+      - "8000:8000"
+    environment:
+      # Aquí sobreescribimos las variables de database.py
+      DB_HOST: db         # ¡MAGIA! Docker usa el nombre del servicio 'db' como IP
+      DB_USER: root
+      DB_PASSWORD: root030204
+      DB_NAME: auto_empeno_db
+      DB_PORT: 3306
+    volumes:
+      # Esto conecta tu carpeta local con el contenedor.
+      # Si cambias código en tu PC, se actualiza en Docker al instante.
+      - .:/app
+    # El comando --reload sirve para recargar si cambias código
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  mysql_data:
