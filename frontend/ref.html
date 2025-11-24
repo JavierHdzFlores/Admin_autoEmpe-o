@@ -202,7 +202,7 @@
 
       try {
         // Llamamos al endpoint que acabamos de crear
-        const response = await fetch(`http://localhost:8000/clientes/buscar?q=${query}`, {
+        const response = await fetch(`/clientes/buscar?q=${query}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -345,7 +345,7 @@
       if(!confirm(`¿Confirmas recibir el pago de $${montoAPagar.toFixed(2)}?`)) return;
 
       try {
-          const response = await fetch(`http://localhost:8000/empenos/${empenoSeleccionadoId}/refrendo`, {
+          const response = await fetch(`/empenos/${empenoSeleccionadoId}/refrendo`, {
               method: 'POST',
               headers: { 
                   'Authorization': `Bearer ${token}`,

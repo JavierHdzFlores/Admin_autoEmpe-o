@@ -135,7 +135,7 @@
 
         try {
             // 1. Cargar contadores (Tarjetas)
-            const resStats = await fetch('http://localhost:8000/dashboard/resumen', {
+            const resStats = await fetch('/dashboard/resumen', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -148,7 +148,7 @@
             }
 
             // 2. Cargar Tabla de Acciones Rápidas (NUEVO)
-            const resTabla = await fetch('http://localhost:8000/dashboard/tabla', {
+            const resTabla = await fetch('/dashboard/tabla', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 

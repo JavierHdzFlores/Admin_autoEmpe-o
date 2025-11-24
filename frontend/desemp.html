@@ -183,7 +183,7 @@
 
     btnBuscar.addEventListener('click', async () => {
         const q = inputBusqueda.value;
-        const res = await fetch(`http://localhost:8000/clientes/buscar?q=${q}`, {
+        const res = await fetch(`/clientes/buscar?q=${q}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const clientes = await res.json();
@@ -283,7 +283,7 @@
         if(!confirm("¿Confirmas el desempeño?")) return;
 
         try {
-            const res = await fetch(`http://localhost:8000/empenos/${empenoSeleccionadoId}/desempeno`, {
+            const res = await fetch(`/empenos/${empenoSeleccionadoId}/desempeno`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

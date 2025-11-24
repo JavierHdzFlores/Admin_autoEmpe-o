@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 from datetime import timedelta
 from typing import List # ¡IMPORTANTE! Para las listas
 import pydantic
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
 
 # Imports sin puntos para Docker
 from database import engine, get_db
@@ -26,11 +29,23 @@ app.add_middleware(
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# --- RUTAS ---
+# --- CONFIGURACIÓN PARA SERVIR FRONTEND (PRODUCCIÓN) ---
 
+# 1. Montar la carpeta "frontend" para que CSS y JS funcionen
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+# 2. Ruta para la página de inicio (Login)
 @app.get("/")
-def read_root():
-    return {"mensaje": "API Operativa 🚀"}
+async def read_index():
+    return FileResponse('frontend/login.html')
+
+# 3. Truco para que al abrir "dash.html" funcione sin poner /frontend/
+@app.get("/{filename}")
+async def read_html(filename: str):
+    file_path = f"frontend/{filename}"
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    return {"error": "Archivo no encontrado"}
 
 # LOGIN
 @app.post("/token", response_model=schemas.Token)

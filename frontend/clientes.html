@@ -164,7 +164,7 @@
       // tbody.innerHTML = '... cargando ...'; (Opcional)
 
       try {
-        const response = await fetch('http://localhost:8000/empenos/todos', {
+        const response = await fetch('/empenos/todos', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 

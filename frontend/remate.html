@@ -98,7 +98,7 @@
       tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Cargando inventario...</td></tr>';
 
       try {
-        const res = await fetch('http://localhost:8000/empenos/todos', {
+        const res = await fetch('/empenos/todos', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -178,7 +178,7 @@
         if (precioReal === null) return; // Cancelado
         
         try {
-            const res = await fetch(`http://localhost:8000/empenos/${id}/venta`, {
+            const res = await fetch(`/empenos/${id}/venta`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
