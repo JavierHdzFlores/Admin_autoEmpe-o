@@ -242,3 +242,15 @@ def procesar_venta_remate(db: Session, empeno_id: int, precio_venta: float):
     db.commit()
     db.refresh(empeno)
     return empeno
+
+# --- MOVER A REMATE (Función Faltante) ---
+def mover_a_remate(db: Session, empeno_id: int):
+    """
+    Cambia el estado del empeño a 'Rematado' para que aparezca en la tabla de ventas.
+    """
+    empeno = get_empeno(db, empeno_id)
+    if empeno:
+        empeno.estado = models.EstadoEmpeno.rematado
+        db.commit()
+        db.refresh(empeno)
+    return empeno

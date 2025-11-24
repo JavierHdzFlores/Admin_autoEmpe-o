@@ -190,3 +190,11 @@ def registrar_venta(id: int, datos: VentaRequest, db: Session = Depends(get_db),
     if not resultado:
         raise HTTPException(status_code=400, detail="El artículo no está disponible para venta")
     return {"mensaje": "Artículo vendido", "estado": resultado.estado}
+
+# --- RUTA PARA ENVIAR A REMATE (Faltaba esta) ---
+@app.post("/empenos/{id}/rematar")
+def rematar_empeno(id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    resultado = crud.mover_a_remate(db, id)
+    if not resultado:
+        raise HTTPException(status_code=404, detail="Empeño no encontrado")
+    return {"mensaje": "Artículo enviado a remate", "estado": resultado.estado}
