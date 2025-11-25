@@ -139,6 +139,11 @@
 
             <div class="summary-item penalty">
               <span> Recargos:</span>
+              <span id="resumen-recargos">$0.00</span>
+            </div>
+
+            <div class="summary-item penalty">
+              <span> Multa:</span>
               <span id="resumen-multa">$0.00</span>
             </div>
 
@@ -325,7 +330,7 @@
       const spanDias = document.getElementById('resumen-dias');
       spanDias.style.color = diasRetraso > 0 ? 'red' : 'green';
 
-      document.getElementById('resumen-multa').innerText = `$${multa.toFixed(2)}`;
+      document.getElementById('resumen-recargos').innerText = `$${multa.toFixed(2)}`;
       document.getElementById('resumen-total').innerText = `$${montoAPagar.toFixed(2)}`;
       document.getElementById('resumen-mensaje').innerText = `Folio ${id} seleccionado.`;
 
