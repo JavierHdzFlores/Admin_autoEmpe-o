@@ -65,7 +65,7 @@
       <div class="search-bar">
         <input type="text" id="busqueda-input" placeholder="Ingrese celular o INE del cliente...">
         <button type="button" id="btn-buscar" class="search-btn">Buscar Cliente</button>
-          <span>&#128269;</span> Buscar Cliente
+          <span>&#128269;</span> 
       </div>
       
       <div id="refrendo-details">
@@ -311,50 +311,58 @@
   let empenoSeleccionadoId = null;
   let interesBaseGlobal = 0; // Para recordar el interés original
 
-  // 1. FUNCIÓN DE SELECCIÓN (Actualizada)
+// --- FUNCIÓN DE SELECCIÓN (Con Recargo Automático del 10%) ---
   function seleccionarEmpeno(id, fechaVencimientoStr, montoPrestamo, nombreCliente, nombreArticulo) {
       empenoSeleccionadoId = id;
 
-      // Llenar datos informativos
+      // 1. Llenar datos informativos
       document.getElementById('info-cliente').value = nombreCliente;
       document.getElementById('info-articulo').value = nombreArticulo;
       document.getElementById('info-prestamo').value = `$${montoPrestamo.toFixed(2)}`;
       document.getElementById('info-vencimiento').value = fechaVencimientoStr;
 
-      // Calcular Interés Base (10%)
+      // 2. Calcular Interés Base (Refrendo)
+      // Asumimos que el interés normal también es 10% o lo que dicte tu lógica
       interesBaseGlobal = montoPrestamo * 0.10;
       document.getElementById('info-interes').value = `$${interesBaseGlobal.toFixed(2)}`;
       document.getElementById('resumen-base').innerText = `$${interesBaseGlobal.toFixed(2)}`;
 
-      // Calcular Días de Retraso (Solo informativo)
+      // 3. Calcular Días de Retraso (Informativo)
       const hoy = new Date();
       const fechaVenc = new Date(fechaVencimientoStr + 'T00:00:00');
       const diffTime = hoy - fechaVenc;
       const diasRetraso = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      // Resetear inputs de multas a 0 o sugerir valor
+      // 4. --- AQUÍ ESTÁ EL CAMBIO ---
+      // Calcular Recargo por Defecto (10% del Préstamo)
+      const recargoDefault = montoPrestamo * 0.10;
+      
       const inputRecargos = document.getElementById('input-recargos');
       const inputMulta = document.getElementById('input-multa');
       
-      // Lógica opcional: Sugerir multa si hay retraso (puedes borrar esto si quieres que empiece en 0)
+      // Asignamos el 10% sugerido al input de recargos
+      inputRecargos.value = recargoDefault.toFixed(2);
+
+      // Lógica de Multas (Sigue igual: sugerir si hay retraso)
       if (diasRetraso > 0) {
           document.getElementById('resumen-dias').innerText = `${diasRetraso} días de retraso`;
           document.getElementById('resumen-dias').style.color = 'red';
-          inputMulta.value = (diasRetraso * 10).toFixed(2); // Sugerir $10 por día
+          // Ejemplo: $10 por día de retraso
+          inputMulta.value = (diasRetraso * 10).toFixed(2); 
       } else {
           document.getElementById('resumen-dias').innerText = "Al día";
           document.getElementById('resumen-dias').style.color = 'green';
           inputMulta.value = "0.00";
       }
-      inputRecargos.value = "0.00";
 
       document.getElementById('resumen-mensaje').innerText = `Folio ${id} seleccionado.`;
 
-      // Habilitar botón y calcular total inicial
+      // 5. Habilitar botón y recalcular el total final
       document.getElementById('btn-pagar').disabled = false;
+      
+      // Llamamos a recalcularTotal para que sume: Base + Recargo(10%) + Multa
       recalcularTotal(); 
   }
-
   // 2. NUEVA FUNCIÓN: RECALCULAR TOTAL AL ESCRIBIR
   function recalcularTotal() {
       const valRecargos = parseFloat(document.getElementById('input-recargos').value) || 0;
