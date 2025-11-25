@@ -892,3 +892,83 @@ table tbody tr:nth-child(even) {
   }
 
 }
+
+/* --- CONTENEDOR DE FILTROS (Tarjeta Blanca) --- */
+  .filters {
+    background-color: #ffffff;
+    padding: 20px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* Sombra suave y elegante */
+    display: flex;
+    flex-wrap: wrap; /* Para que se adapte si la pantalla es chica */
+    gap: 20px;
+    align-items: flex-end; /* Alinea los inputs con el botón */
+    margin-bottom: 30px;
+    border: 1px solid #eef2f5;
+  }
+
+  /* --- GRUPOS DE INPUTS --- */
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filter-group label {
+    font-weight: bold;
+    color: #113b64; /* Azul corporativo */
+    font-size: 0.9rem;
+    margin-left: 4px;
+  }
+
+  /* --- ESTILOS PARA TODOS LOS INPUTS Y SELECTS --- */
+  .filter-group input[type="text"],
+  .filter-group input[type="date"],
+  .filter-group select {
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    background-color: #f9f9f9;
+    outline: none;
+    transition: all 0.3s ease;
+    min-width: 180px; /* Ancho mínimo para que no se vean aplastados */
+    font-family: inherit;
+  }
+
+  /* Efecto al escribir o seleccionar (Focus) */
+  .filter-group input:focus,
+  .filter-group select:focus {
+    border-color: #2a5a8a; /* Azul brillante */
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(42, 90, 138, 0.1); /* Resplandor azul suave */
+  }
+
+  /* --- INPUT DE BÚSQUEDA ESPECÍFICO (Más largo) --- */
+  #filtro-texto {
+    min-width: 250px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    padding-left: 35px; /* Espacio para el ícono de lupa */
+  }
+
+  /* --- BOTÓN LIMPIAR (Estilo mejorado) --- */
+  .btn-secondary {
+    padding: 10px 20px;
+    height: 42px; /* Misma altura que los inputs para alinear */
+    border: none;
+    background-color: #e0e0e0;
+    color: #555;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background-color: #d4d4d4;
+    color: #000;
+    transform: translateY(-2px);
+  }
