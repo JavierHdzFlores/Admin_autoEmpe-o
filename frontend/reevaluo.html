@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reevalúo - Panel de Control</title>
+  <title>Revalúo - Panel de Control</title>
   <link rel="stylesheet" href="ref.css"> 
 </head>
 <body>
@@ -29,7 +29,7 @@
           <span class="icon">&#9989;</span> Desempeño
         </a></li>
         <li><a href="reevaluo.html" class="active">
-          <span class="icon">&#128220;</span> Reevalúo
+          <span class="icon">&#128220;</span> Revalúo
         </a></li>
         <li><a href="clientes.html">
           <span class="icon">&#128101;</span> Clientes
@@ -54,7 +54,7 @@
     
     <header class="main-header">
       <button id="menu-toggle" class="hamburger-button">&#9776;</button>
-      <h1>Registrar Reevalúo de Prenda</h1>
+      <h1>Registrar Revalúo de Prenda</h1>
       <div class="user-info">
         <span>Bienvenido, <strong>Dueño</strong></span>
       </div>
@@ -94,7 +94,7 @@
 
       <div class="refrendo-details"> 
         <div class="refrendo-header">
-          <h2>Detalles del Reevalúo</h2>
+          <h2>Detalles del Revalúo</h2>
         </div>
         
         <form id="form-reevaluo">
@@ -155,7 +155,7 @@
 
             <div class="form-actions">
               <button type="button" class="btn btn-secondary" onclick="window.location.href='dash.html'">Cancelar</button>
-              <button type="submit" id="btn-guardar" class="btn btn-primary" disabled>Confirmar Reevalúo</button>
+              <button type="submit" id="btn-guardar" class="btn btn-primary" disabled>Confirmar Revalúo</button>
             </div>
         </form>
       </div>  
@@ -281,7 +281,7 @@
         });
 
         if(res.ok) {
-            alert("✅ Reevalúo exitoso.");
+            alert("✅ Revalúo exitoso.");
             window.location.reload();
         } else {
             alert("Error al procesar");
