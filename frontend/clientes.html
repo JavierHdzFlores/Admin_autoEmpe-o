@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clientes - Panel de Control</title>
-  <link rel="stylesheet" href="ref.css"> 
+  <link rel="stylesheet" href="clientes.css"> 
 </head>
 <body>
 
@@ -63,35 +63,34 @@
     <main class="content">
       
       <div class="filters">
-        <div class="filter-group">
-          <label>Buscar Cliente / Artículo:</label>
-          <button type="button" id="btn-buscar" class="search-btn">Buscar</button>
-          <input type="text" id="filtro-texto" placeholder="Nombre, Folio o Artículo...">
-        </div>
-        
-        <div class="filter-group">
-          <label>Estado:</label>
-          <select id="filtro-estado">
-            <option value="">Todos</option>
-            <option value="Vigente">Vigente</option>
-            <option value="Vencido">Vencido</option>
-            <option value="Desempeñado">Desempeñado</option>
-            <option value="Rematado">Rematado</option>
-          </select>
-        </div>
+          <div class="filter-group">
+              <label for="filtro-texto">Buscar Cliente / Artículo:</label>
+              <input type="text" id="filtro-texto" placeholder="Nombre, Folio o Artículo...">
+          </div>
+          
+          <div class="filter-group">
+              <label for="filtro-estado">Estado:</label>
+              <select id="filtro-estado">
+                  <option value="">Todos</option>
+                  <option value="Vigente">Vigente</option>
+                  <option value="Vencido">Vencido</option>
+                  <option value="Desempeñado">Desempeñado</option>
+                  <option value="Rematado">Rematado</option>
+              </select>
+          </div>
 
-        <div class="filter-group">
-          <label>Desde:</label>
-          <input type="date" id="filtro-fecha-inicio">
-        </div>
-        
-        <div class="filter-group">
-          <label>Hasta:</label>
-          <input type="date" id="filtro-fecha-fin">
-        </div>
+          <div class="filter-group">
+              <label for="filtro-fecha-inicio">Desde:</label>
+              <input type="date" id="filtro-fecha-inicio">
+          </div>
+          
+          <div class="filter-group">
+              <label for="filtro-fecha-fin">Hasta:</label>
+              <input type="date" id="filtro-fecha-fin">
+          </div>
 
-        <button class="btn-secondary" onclick="limpiarFiltros()" style="height: 40px; align-self: flex-end;">Limpiar</button>
-        
+          <button class="btn-secondary" onclick="limpiarFiltros()">Limpiar</button>
+      </div>     
         <div class="search-bar">
                 
       </div>
