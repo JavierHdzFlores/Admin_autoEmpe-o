@@ -189,8 +189,29 @@
   </section>
   <div class="overlay" id="overlay"></div>
   <script>
+    // Lógica para CERRAR SESIÓN
+    const btnLogout = document.querySelector('.logout-button');
+
+    if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+            e.preventDefault(); // Evita que el enlace navegue solo
+            
+            // 1. Borramos la llave del navegador
+            localStorage.removeItem('token_auto_empeno');
+            
+            // 2. (Opcional) Avisamos al usuario
+            alert('Sesión cerrada correctamente');
+
+            // 3. Redirigimos al Login
+            window.location.href = 'login.html';
+        });
+    }
+
+    // Lógica de PROTECCIÓN (Si no tienes llave, ¡fuera de aquí!)
     const token = localStorage.getItem('token_auto_empeno');
-    if (!token) window.location.href = '/';
+    if (!token) {
+        window.location.href = 'login.html';
+    }
 
     // --- 1. LÓGICA DE BÚSQUEDA ---
     const btnBuscar = document.getElementById('btn-buscar');
