@@ -705,3 +705,63 @@ table tbody tr:nth-child(even) {
     padding: 10px 20px;
   }
 }
+
+/* =========================================
+   ESTILOS BARRA DE BÚSQUEDA (MODERNO)
+   ========================================= */
+
+.search-bar {
+  display: flex;            /* Pone input y botón en fila */
+  gap: 10px;                /* Espacio entre ellos */
+  background-color: #fff;   /* Fondo blanco limpio */
+  padding: 15px;
+  border-radius: 10px;      /* Bordes suaves */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Sombra sutil */
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+/* El campo de texto (Input) */
+#busqueda-input {
+  flex-grow: 1;             /* Ocupa todo el espacio disponible */
+  padding: 12px 15px;
+  font-size: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  transition: border-color 0.3s ease;
+  outline: none;
+}
+
+#busqueda-input:focus {
+  border-color: #2a5a8a;    /* Se pone azul al escribir */
+}
+
+/* El Botón de Buscar */
+.search-btn {
+  background: linear-gradient(135deg, #113b64 0%, #2a5a8a 100%); /* Degradado marca */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espacio para ícono si lo agregamos */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Efecto Hover (Al pasar el mouse) */
+.search-btn:hover {
+  transform: translateY(-2px); /* Se levanta un poquito */
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  background: linear-gradient(135deg, #164d82 0%, #356ba0 100%);
+}
+
+/* Efecto Active (Al hacer clic) */
+.search-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
