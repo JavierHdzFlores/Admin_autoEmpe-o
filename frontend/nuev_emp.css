@@ -394,6 +394,23 @@ table tbody tr:nth-child(even) {
   outline: none;
 }
 
+.input-error {
+    border: 2px solid #ff4444 !important; /* Borde Rojo */
+    background-color: #fff0f0 !important; /* Fondo rojizo suave */
+  }
+  
+  /* Animación para llamar la atención */
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+  }
+  .shake {
+    animation: shake 0.3s;
+  }
+
 /* Contenedor de los botones de acción */
 .form-actions {
   margin-top: 30px;
