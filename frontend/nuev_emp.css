@@ -494,3 +494,11 @@ input[readonly] {
   cursor: not-allowed;
   font-weight: bold;
 }
+
+/* --- ASTERISCO DE CAMPO OBLIGATORIO --- */
+label.required::after {
+  content: " *";
+  color: #ff4444; /* Mismo rojo que el borde de error */
+  font-weight: bold;
+  margin-left: 4px;
+}

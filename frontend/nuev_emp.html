@@ -68,23 +68,23 @@
           <h3>Datos del Cliente</h3>
           <div class="form-grid">
             <div class="input-group">
-              <label for="cliente-nombre">Nombre(s)</label>
+              <label class="required" for="cliente-nombre">Nombre(s)</label>
               <input type="text" id="cliente-nombre" name="cliente-nombre" required>
             </div>
             <div class="input-group">
-              <label for="cliente-apellidos">Apellidos</label>
+              <label class="required" for="cliente-apellidos">Apellidos</label>
               <input type="text" id="cliente-apellidos" name="cliente-apellidos" required>
             </div>
             <div class="input-group">
-              <label for="cliente-telefono">Teléfono</label>
+              <label class="required" for="cliente-telefono">Teléfono</label>
               <input type="text" id="cliente-telefono" name="cliente-telefono">
             </div>
             <div class="input-group">
-              <label for="cliente-ine">ID / INE</label>
+              <label class="required" for="cliente-ine">ID / INE</label>
               <input type="text" id="cliente-ine" name="cliente-ine">
             </div>
-            <div class="input-group full-width">
-              <label for="cliente-direccion">Dirección</label>
+            <div  class="input-group full-width">
+              <label class="required" for="cliente-direccion">Dirección</label>
               <input type="text" id="cliente-direccion" name="cliente-direccion">
             </div>
           </div>
@@ -92,7 +92,7 @@
           <h3>Datos del Artículo</h3>
           <div class="form-grid">
             <div class="input-group">
-              <label for="articulo-categoria">Categoría</label>
+              <label class="required" for="articulo-categoria">Categoría</label>
               <select id="articulo-categoria" name="articulo-categoria">
                 <option value="">Seleccione una...</option>
                 <option value="joyeria">Joyería (Oro, Plata)</option>
@@ -105,19 +105,19 @@
               </select>
             </div>
             <div class="input-group">
-              <label for="articulo-marca">Nombre del articulo/ Marca / Modelo</label>
+              <label class="required" for="articulo-marca">Nombre del articulo/ Marca / Modelo</label>
               <input type="text" id="articulo-marca" name="articulo-marca">
             </div>
             <div class="input-group full-width">
-              <label for="articulo-descripcion">Descripción detallada</label>
+              <label class="required" for="articulo-descripcion">Descripción detallada</label>
               <textarea id="articulo-descripcion" name="articulo-descripcion" rows="3"></textarea>
             </div>
             <div class="input-group">
-              <label for="articulo-serie">Núm. de Serie o peso (si aplica)</label>
+              <label class="required" for="articulo-serie">Núm. de Serie o peso (si aplica)</label>
               <input type="text" id="articulo-serie" name="articulo-serie">
             </div>
             <div class="input-group">
-              <label for="articulo-observaciones">Observaciones (ej. rayones, sin caja)</label>
+              <label class="required" for="articulo-observaciones">Observaciones (ej. rayones, sin caja)</label>
               <input type="text" id="articulo-observaciones" name="articulo-observaciones">
             </div>
           </div>
@@ -125,33 +125,33 @@
           <h3>Detalles del Préstamo</h3>
           <div class="form-grid cols-3">
             <div class="input-group">
-              <label for="prestamo-valuo">Valor de Valúo ($)</label>
+              <label class="required" for="prestamo-valuo">Valor de Valúo ($)</label>
               <input type="number" id="articulo-avaluo" name="prestamo-valuo" step="0.01" required>
             </div>
             <div class="input-group">
-              <label for="prestamo-monto">Monto del Préstamo ($)</label>
+              <label class="required" for="prestamo-monto">Monto del Préstamo ($)</label>
               <input type="number" id="prestamo-monto" name="prestamo-monto" step="0.01" required>
             </div>
             <div class="input-group">
-              <label for="prestamo-interes">Interés Mensual (%)</label>
+              <label class="required" for="prestamo-interes">Interés Mensual (%)</label>
               <input type="number" id="prestamo-interes" name="prestamo-interes" value="10" required>
             </div>
             
             <div class="input-group">
-              <label for="fecha-empeno">Fecha de Empeño</label>
+              <label class="required" for="fecha-empeno">Fecha de Empeño</label>
               <input type="date" id="fecha-empeno" name="fecha-empeno" required>
             </div>
             <div class="input-group">
-              <label for="fecha-refrendo">Fecha de Refrendo / Vencimiento</label>
+              <label class="required" for="fecha-refrendo">Fecha de Refrendo / Vencimiento</label>
               <input type="date" id="fecha-refrendo" name="fecha-refrendo" readonly>
             </div>
             <div class="input-group">
-              <label for="monto-refrendo">Monto de Refrendo (Interés) ($)</label>
+              <label class="required" for="monto-refrendo">Monto de Refrendo (Interés) ($)</label>
               <input type="number" id="monto-refrendo" name="monto-refrendo" step="0.01" readonly>
             </div>
 
             <div class="input-group">
-              <label for="total-desempeno">Total de Desempeño ($)</label>
+              <label class="required" for="total-desempeno">Total de Desempeño ($)</label>
               <input type="number" id="total-desempeno" name="total-desempeno" step="0.01" readonly>
             </div>
             </div>
