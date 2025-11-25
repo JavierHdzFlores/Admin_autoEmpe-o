@@ -398,6 +398,16 @@ table tbody tr:nth-child(even) {
   outline: none;
 }
 
+.input-monto-editable {
+  width: 80px;
+  text-align: right;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-weight: bold;
+  color: #d9534f; /* Color rojizo para indicar cobro extra */
+}
+
 /* Contenedor de los botones de acción */
 .form-actions {
   margin-top: 30px;
@@ -623,6 +633,7 @@ table tbody tr:nth-child(even) {
 }
 .summary-item.info { color: var(--color-azul-medio); }
 .summary-item.penalty { color: #D8000C; }
+.summary-item.multa { color: #D8000C; }
 .summary-total {
   display: flex;
   justify-content: space-between;

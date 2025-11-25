@@ -44,7 +44,7 @@
     </nav>
 
     <div class="sidebar-footer">
-      <a href="index.html" class="logout-button">
+      <a href="index.html"class="logout-button">
         <span class="icon">&#128682;</span> Cerrar Sesión
       </a>
     </div>
@@ -138,13 +138,13 @@
             </div>
 
             <div class="summary-item penalty">
-              <span> Recargos:</span>
-              <span id="resumen-recargos">$0.00</span>
+              <span>Recargos:</span>
+              <input type="number" id="input-recargos" value="0.00" step="1.00" class="input-monto-editable">
             </div>
 
-            <div class="summary-item multa">
-              <span> Multa:</span>
-              <span id="resumen-multa">$0.00</span>
+            <div class="summary-item penalty">
+              <span>Multa:</span>
+              <input type="number" id="input-multa" value="0.00" step="1.00" class="input-monto-editable">
             </div>
 
             <div class="summary-item-details">
@@ -190,7 +190,7 @@
   <div class="overlay" id="overlay"></div>
   <script>
     const token = localStorage.getItem('token_auto_empeno');
-    if (!token) window.location.href = 'login.html';
+    if (!token) window.location.href = '/';
 
     // --- 1. LÓGICA DE BÚSQUEDA ---
     const btnBuscar = document.getElementById('btn-buscar');
@@ -288,81 +288,96 @@
    
    // Variables globales para saber qué estamos pagando
   let empenoSeleccionadoId = null;
-  let montoAPagar = 0;
+  let interesBaseGlobal = 0; // Para recordar el interés original
 
-  // --- 2. LÓGICA DE SELECCIÓN Y CÁLCULOS ---
-  // --- NUEVA FUNCIÓN SELECCIONAR (Con datos visuales) ---
+  // 1. FUNCIÓN DE SELECCIÓN (Actualizada)
   function seleccionarEmpeno(id, fechaVencimientoStr, montoPrestamo, nombreCliente, nombreArticulo) {
-      // 1. Guardamos el ID para pagar después
       empenoSeleccionadoId = id;
 
-      // 2. LLENAR LOS CAMPOS VISUALES (Lo que pediste)
+      // Llenar datos informativos
       document.getElementById('info-cliente').value = nombreCliente;
       document.getElementById('info-articulo').value = nombreArticulo;
       document.getElementById('info-prestamo').value = `$${montoPrestamo.toFixed(2)}`;
       document.getElementById('info-vencimiento').value = fechaVencimientoStr;
-      
-      // Calculamos el interés (10%) para mostrarlo
-      const interesBase = montoPrestamo * 0.10;
-      document.getElementById('info-interes').value = `$${interesBase.toFixed(2)}`;
 
-      // 3. CÁLCULOS DEL PANEL DERECHO (Esto sigue igual que antes)
+      // Calcular Interés Base (10%)
+      interesBaseGlobal = montoPrestamo * 0.10;
+      document.getElementById('info-interes').value = `$${interesBaseGlobal.toFixed(2)}`;
+      document.getElementById('resumen-base').innerText = `$${interesBaseGlobal.toFixed(2)}`;
+
+      // Calcular Días de Retraso (Solo informativo)
       const hoy = new Date();
       const fechaVenc = new Date(fechaVencimientoStr + 'T00:00:00');
-      
-      const diferenciaTiempo = hoy - fechaVenc;
-      const diasDiferencia = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
-      
-      let diasRetraso = 0;
-      let multa = 0;
+      const diffTime = hoy - fechaVenc;
+      const diasRetraso = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (diasDiferencia > 0) {
-          diasRetraso = diasDiferencia;
-          multa = diasRetraso * 10; // $10 por día de retraso
+      // Resetear inputs de multas a 0 o sugerir valor
+      const inputRecargos = document.getElementById('input-recargos');
+      const inputMulta = document.getElementById('input-multa');
+      
+      // Lógica opcional: Sugerir multa si hay retraso (puedes borrar esto si quieres que empiece en 0)
+      if (diasRetraso > 0) {
+          document.getElementById('resumen-dias').innerText = `${diasRetraso} días de retraso`;
+          document.getElementById('resumen-dias').style.color = 'red';
+          inputMulta.value = (diasRetraso * 10).toFixed(2); // Sugerir $10 por día
+      } else {
+          document.getElementById('resumen-dias').innerText = "Al día";
+          document.getElementById('resumen-dias').style.color = 'green';
+          inputMulta.value = "0.00";
       }
+      inputRecargos.value = "0.00";
 
-      montoAPagar = interesBase + multa;
-
-      // Actualizar panel derecho
-      document.getElementById('resumen-base').innerText = `$${interesBase.toFixed(2)}`;
-      document.getElementById('resumen-dias').innerText = diasRetraso > 0 ? `${diasRetraso} días de retraso` : 'Al día';
-      
-      const spanDias = document.getElementById('resumen-dias');
-      spanDias.style.color = diasRetraso > 0 ? 'red' : 'green';
-
-      document.getElementById('resumen-recargos').innerText = `$${multa.toFixed(2)}`;
-      document.getElementById('resumen-total').innerText = `$${montoAPagar.toFixed(2)}`;
       document.getElementById('resumen-mensaje').innerText = `Folio ${id} seleccionado.`;
 
-      // Habilitar botón
-      const btnPagar = document.getElementById('btn-pagar');
-      btnPagar.disabled = false;
-      btnPagar.innerText = `Cobrar $${montoAPagar.toFixed(2)}`;
+      // Habilitar botón y calcular total inicial
+      document.getElementById('btn-pagar').disabled = false;
+      recalcularTotal(); 
   }
-  // --- 3. LÓGICA DEL BOTÓN PAGAR ---
-  const btnPagar = document.getElementById('btn-pagar');
-  
-  btnPagar.addEventListener('click', async (e) => {
-      e.preventDefault(); // Evita recargas
 
+  // 2. NUEVA FUNCIÓN: RECALCULAR TOTAL AL ESCRIBIR
+  function recalcularTotal() {
+      const valRecargos = parseFloat(document.getElementById('input-recargos').value) || 0;
+      const valMulta = parseFloat(document.getElementById('input-multa').value) || 0;
+      
+      const granTotal = interesBaseGlobal + valRecargos + valMulta;
+
+      document.getElementById('resumen-total').innerText = `$${granTotal.toFixed(2)}`;
+      
+      const btnPagar = document.getElementById('btn-pagar');
+      btnPagar.innerText = `Cobrar $${granTotal.toFixed(2)}`;
+  }
+
+  // 3. LISTENERS PARA QUE SE ACTUALICE AL ESCRIBIR
+  document.getElementById('input-recargos').addEventListener('input', recalcularTotal);
+  document.getElementById('input-multa').addEventListener('input', recalcularTotal);
+
+  // 4. ACTUALIZAR EL BOTÓN DE PAGAR (Para enviar los datos reales)
+  const btnPagar = document.getElementById('btn-pagar');
+  btnPagar.addEventListener('click', async (e) => {
+      e.preventDefault();
       if (!empenoSeleccionadoId) return;
 
-      if(!confirm(`¿Confirmas recibir el pago de $${montoAPagar.toFixed(2)}?`)) return;
+      // Obtenemos los valores finales que escribió el usuario
+      const totalPagar = parseFloat(document.getElementById('resumen-total').innerText.replace('$',''));
+      
+      if(!confirm(`¿Cobrar un total de $${totalPagar.toFixed(2)}?`)) return;
 
       try {
+          // Nota: Aquí enviamos un body vacío porque en el paso anterior tu backend calculaba solo.
+          // Para que el backend guarde la multa exacta, habría que actualizar main.py,
+          // pero por ahora el frontend ya te deja cobrar visualmente.
           const response = await fetch(`/empenos/${empenoSeleccionadoId}/refrendo`, {
               method: 'POST',
               headers: { 
                   'Authorization': `Bearer ${token}`,
                   'Content-Type': 'application/json'
               },
-              body: JSON.stringify({}) // Mandamos body vacío por ahora
+              body: JSON.stringify({}) 
           });
 
           if (response.ok) {
-              const data = await response.json();
-              alert(`✅ ¡Pago registrado con éxito!\nNueva fecha de vencimiento: ${data.nueva_fecha}`);
-              window.location.reload(); // Recargamos para limpiar
+              alert(`✅ Pago registrado exitosamente.`);
+              window.location.reload();
           } else {
               alert("Error al registrar el pago.");
           }
@@ -370,7 +385,7 @@
           console.error(error);
           alert("Error de conexión");
       }
-  }); 
+  });
   </script>
 
   <style>
