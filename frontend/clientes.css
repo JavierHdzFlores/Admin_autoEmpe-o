@@ -439,6 +439,18 @@ table tbody tr:nth-child(even) {
   background-color: #b3b3b3;
 }
 
+/* Botones de Icono en la Tabla */
+  .btn-icon {
+      border: none;
+      background: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 50%;
+      transition: background 0.2s;
+  }
+  .btn-edit:hover { background-color: #e3f2fd; } /* Azulito al pasar mouse */
+  .btn-delete:hover { background-color: #ffebee; } /* Rojito al pasar mouse */
 /* =======================================================
    5. AJUSTES RESPONSIVE PARA FORMULARIO (¡ACTUALIZADO!)
 ========================================================== */

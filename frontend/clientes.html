@@ -284,29 +284,34 @@
     listaDatos.forEach(item => {
       const tr = document.createElement('tr');
       
-      // --- AQUÍ ESTÁ LA MAGIA PARA EL NOMBRE ---
-      let nombreMostrado = `Cliente #${item.cliente_id}`; // Valor por defecto
-      
-      // Verificamos si el backend nos mandó los datos del cliente
+      // Resolver Nombre
+      let nombreMostrado = `Cliente #${item.cliente_id}`;
       if (item.cliente && item.cliente.nombre) {
           nombreMostrado = `${item.cliente.nombre} ${item.cliente.apellidos}`;
       }
-      // -----------------------------------------
 
+      // Formatos
       const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.monto_prestamo);
       const estadoClass = item.estado.toLowerCase();
 
-      // Lógica del botón de remate (que ya tenías)
-      let botonAccion = '';
+      // --- BOTONES DE ACCIÓN ---
+      let botones = '';
+      
+      // 1. Botón Editar (Siempre visible) - Usamos el ID para buscar los datos luego
+      botones += `
+        <button class="btn-icon btn-edit" onclick="abrirEdicion(${item.id})" title="Ver/Editar Detalles">
+            ✏️
+        </button>
+      `;
+
+      // 2. Botón Rematar (Solo si está vencido)
       if (item.estado === 'Vencido') {
-          botonAccion = `
-            <button class="btn-rematar" onclick="enviarARemate(${item.id}, '${item.marca_modelo}')">
-               📢 Rematar
+          botones += `
+            <button class="btn-icon btn-delete" onclick="enviarARemate(${item.id}, '${item.marca_modelo}')" title="Enviar a Remate">
+               📢
             </button>`;
       } else if (item.estado === 'Rematado') {
-          botonAccion = '<span style="color:orange; font-size:0.8em;">En Remate</span>';
-      } else {
-          botonAccion = '<span style="color:#ccc;">-</span>';
+          botones += '<span style="font-size:0.8em; color:orange;">(En Remate)</span>';
       }
 
       tr.innerHTML = `
@@ -316,8 +321,12 @@
         <td>${montoFmt}</td>
         <td>${item.fecha_empeno}</td>
         <td>${item.fecha_vencimiento}</td>
-        <td><span class="status status-${estadoClass}">${item.estado}</span></td>
-        <td style="text-align:center;">${botonAccion}</td>
+        <td><span class=\"status status-${estadoClass}\">${item.estado}</span></td>
+        <td style=\"text-align:center;\">
+            <div style=\"display:flex; justify-content:center; gap:10px;\">
+                ${botones}
+            </div>
+        </td>
       `;
       tbody.appendChild(tr);
     });
@@ -377,6 +386,38 @@
         });
     }
 
+    // --- FUNCIÓN PARA ABRIR EL EDITOR ---
+  window.abrirEdicion = function(id) {
+      // 1. Buscar el objeto completo en la memoria
+      const item = todosLosEmpenos.find(e => e.id === id);
+      if (!item) return;
+
+      // 2. Llenar los campos del formulario con los datos actuales
+      // IDs Ocultos
+      document.getElementById('edit-empeno-id').value = item.id;
+      document.getElementById('edit-cliente-id').value = item.cliente_id;
+
+      // Datos Cliente (Si existen)
+      if (item.cliente) {
+          document.getElementById('edit-nombre').value = item.cliente.nombre || '';
+          document.getElementById('edit-apellidos').value = item.cliente.apellidos || '';
+          document.getElementById('edit-telefono').value = item.cliente.telefono || '';
+          document.getElementById('edit-direccion').value = item.cliente.direccion || '';
+      }
+
+      // Datos Artículo
+      document.getElementById('edit-categoria').value = item.categoria || '';
+      document.getElementById('edit-articulo').value = item.marca_modelo || '';
+      document.getElementById('edit-estado').value = item.estado; // Select inteligente
+      document.getElementById('edit-fecha-empeno').value = item.fecha_empeno;
+      document.getElementById('edit-fecha-vencimiento').value = item.fecha_vencimiento;
+
+      // 3. MOSTRAR EL FORMULARIO (Quitamos el display: none)
+      document.getElementById('seccion-editar-cliente').style.display = 'block';
+      
+      // Hacemos scroll suave hacia el formulario para que el usuario lo vea
+      document.getElementById('seccion-editar-cliente').scrollIntoView({ behavior: 'smooth' });
+  };
     // Función para cerrar el panel
     window.cerrarEdicion = function() {
         document.getElementById('seccion-editar-cliente').style.display = 'none';
