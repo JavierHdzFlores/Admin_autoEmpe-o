@@ -254,3 +254,29 @@ def mover_a_remate(db: Session, empeno_id: int):
         db.commit()
         db.refresh(empeno)
     return empeno
+
+# --- ACTUALIZAR EMPEÑO Y CLIENTE ---
+def editar_empeno_completo(db: Session, empeno_id: int, datos: schemas.EdicionCompletaRequest):
+    # 1. Buscar el Empeño
+    empeno = get_empeno(db, empeno_id)
+    if not empeno:
+        return None
+
+    # 2. Actualizar datos del Empeño
+    empeno.categoria = datos.categoria
+    empeno.marca_modelo = datos.marca_modelo
+    empeno.estado = datos.estado
+    empeno.fecha_empeno = datos.fecha_empeno
+    empeno.fecha_vencimiento = datos.fecha_vencimiento
+
+    # 3. Buscar y Actualizar datos del Cliente
+    if empeno.cliente:
+        empeno.cliente.nombre = datos.nombre
+        empeno.cliente.apellidos = datos.apellidos
+        empeno.cliente.telefono = datos.telefono
+        empeno.cliente.direccion = datos.direccion
+
+    # 4. Guardar cambios
+    db.commit()
+    db.refresh(empeno)
+    return empeno

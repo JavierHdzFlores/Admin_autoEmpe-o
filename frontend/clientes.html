@@ -422,6 +422,54 @@
     window.cerrarEdicion = function() {
         document.getElementById('seccion-editar-cliente').style.display = 'none';
     }
+  // --- GUARDAR CAMBIOS (EDICIÓN) ---
+  const formEditar = document.getElementById('form-editar');
+
+  formEditar.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Evita que se recargue la página sola
+
+      // 1. Recoger los IDs ocultos
+      const idEmpeno = document.getElementById('edit-empeno-id').value;
+
+      // 2. Armar el objeto con los datos del formulario
+      const payload = {
+          // Datos Cliente
+          nombre: document.getElementById('edit-nombre').value,
+          apellidos: document.getElementById('edit-apellidos').value,
+          telefono: document.getElementById('edit-telefono').value,
+          direccion: document.getElementById('edit-direccion').value,
+
+          // Datos Empeño
+          categoria: document.getElementById('edit-categoria').value,
+          marca_modelo: document.getElementById('edit-articulo').value,
+          estado: document.getElementById('edit-estado').value,
+          fecha_empeno: document.getElementById('edit-fecha-empeno').value,
+          fecha_vencimiento: document.getElementById('edit-fecha-vencimiento').value
+      };
+
+      try {
+          // 3. Enviar al Backend (PUT)
+          const response = await fetch(`/empenos/${idEmpeno}/editar`, {
+              method: 'PUT', // Usamos PUT para actualizar
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(payload)
+          });
+
+          if (response.ok) {
+              alert("✅ Cambios guardados correctamente");
+              window.location.reload(); // Recargamos para ver los cambios en la tabla
+          } else {
+              alert("Error al guardar los cambios");
+          }
+
+      } catch (error) {
+          console.error(error);
+          alert("Error de conexión");
+      }
+  });
   </script>
 </body>
 </html>

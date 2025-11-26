@@ -198,3 +198,16 @@ def rematar_empeno(id: int, db: Session = Depends(get_db), token: str = Depends(
     if not resultado:
         raise HTTPException(status_code=404, detail="Empeño no encontrado")
     return {"mensaje": "Artículo enviado a remate", "estado": resultado.estado}
+
+# --- RUTA PARA EDITAR CLIENTE Y EMPEÑO ---
+@app.put("/empenos/{id}/editar")
+def editar_empeno(
+    id: int, 
+    datos: schemas.EdicionCompletaRequest, 
+    db: Session = Depends(get_db), 
+    token: str = Depends(oauth2_scheme)
+):
+    resultado = crud.editar_empeno_completo(db, empeno_id=id, datos=datos)
+    if not resultado:
+        raise HTTPException(status_code=404, detail="Empeño no encontrado")
+    return {"mensaje": "Datos actualizados correctamente", "data": resultado}

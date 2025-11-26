@@ -147,3 +147,18 @@ class ReevaluoRequest(BaseModel):
     
 class VentaRequest(BaseModel):
     precio_venta: float
+
+# --- SCHEMA PARA EDICIÓN COMPLETA ---
+class EdicionCompletaRequest(BaseModel):
+    # Datos Cliente
+    nombre: str
+    apellidos: str
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+    
+    # Datos Empeño
+    categoria: str
+    marca_modelo: str
+    estado: EstadoEmpeno
+    fecha_empeno: date
+    fecha_vencimiento: date
