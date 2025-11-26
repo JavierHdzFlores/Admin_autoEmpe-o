@@ -119,14 +119,14 @@
             alert('Sesión cerrada correctamente');
 
             // 3. Redirigimos al Login
-            window.location.href = 'login.html';
+            window.location.href = '/';
         });
     }
 
     // Lógica de PROTECCIÓN (Si no tienes llave, ¡fuera de aquí!)
     const token = localStorage.getItem('token_auto_empeno');
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = '/';
     }
     // Función para cargar datos del Dashboard
     async function cargarDashboard() {
