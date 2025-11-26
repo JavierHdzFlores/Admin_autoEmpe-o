@@ -975,3 +975,73 @@ table tbody tr:nth-child(even) {
     color: #000;
     transform: translateY(-2px);
   }
+
+  /* --- ESTILOS DEL PANEL DE EDICIÓN --- */
+  .edit-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-left: 5px solid #f5b301; /* Borde amarillo para resaltar */
+    margin-top: 30px;
+    margin-bottom: 30px;
+    animation: slideDown 0.4s ease;
+  }
+
+  .edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .btn-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+  }
+  .btn-close:hover { color: #d9534f; }
+
+  .section-subtitle {
+    color: #113b64;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 5px;
+  }
+
+  .separator {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 20px 0;
+  }
+
+  /* Grid System para el formulario */
+  .form-grid {
+    display: grid;
+    gap: 15px;
+  }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* En móviles, que todo sea 1 columna */
+  @media (max-width: 768px) {
+    .cols-2, .cols-3 { grid-template-columns: 1fr; }
+  }
+
+  /* Animación de entrada */
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Inputs dentro del editor */
+  .edit-card input, .edit-card select {
+      width: 100%; /* Que ocupen todo su espacio */
+      box-sizing: border-box; /* Para evitar desbordes */
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+  }

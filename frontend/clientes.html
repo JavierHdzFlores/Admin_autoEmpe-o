@@ -113,6 +113,76 @@
             </table>
         </div>
       </div>
+      <!-- Aqui podemos agregar un apartado para que muestre la información del cliente -->
+      <div id="seccion-editar-cliente" class="edit-card" style="display: none;">
+        <div class="edit-header">
+            <h3><span class="icon">&#9999;&#65039;</span> Detalles y Edición del Cliente</h3>
+            <button type="button" class="btn-close" onclick="cerrarEdicion()">×</button>
+        </div>
+
+        <form id="form-editar">
+            <input type="hidden" id="edit-empeno-id">
+            <input type="hidden" id="edit-cliente-id">
+
+            <h4 class="section-subtitle">Datos Personales</h4>
+            <div class="form-grid cols-2">
+                <div class="input-group">
+                    <label>Nombre(s)</label>
+                    <input type="text" id="edit-nombre">
+                </div>
+                <div class="input-group">
+                    <label>Apellidos</label>
+                    <input type="text" id="edit-apellidos">
+                </div>
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="edit-telefono">
+                </div>
+                <div class="input-group">
+                    <label>Dirección</label>
+                    <input type="text" id="edit-direccion">
+                </div>
+            </div>
+
+            <hr class="separator">
+
+            <h4 class="section-subtitle">Datos del Artículo y Empeño</h4>
+            <div class="form-grid cols-3">
+                <div class="input-group">
+                    <label>Categoría</label>
+                    <input type="text" id="edit-categoria">
+                </div>
+                <div class="input-group">
+                    <label>Artículo / Marca</label>
+                    <input type="text" id="edit-articulo">
+                </div>
+                <div class="input-group">
+                    <label>Estado Actual</label>
+                    <select id="edit-estado">
+                        <option value="Vigente">Vigente</option>
+                        <option value="Vencido">Vencido</option>
+                        <option value="Desempeñado">Desempeñado</option>
+                        <option value="Rematado">Rematado</option>
+                        <option value="Vendido">Vendido</option>
+                        <option value="Perdido">Perdido</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Fecha Empeño</label>
+                    <input type="date" id="edit-fecha-empeno">
+                </div>
+                <div class="input-group">
+                    <label>Fecha Vencimiento</label>
+                    <input type="date" id="edit-fecha-vencimiento">
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 20px;">
+                <button type="button" class="btn-secondary" onclick="cerrarEdicion()">Cancelar</button>
+                <button type="submit" class="btn-primary">Guardar Cambios</button>
+            </div>
+        </form>
+      </div>
 
       <div id="activity-summary" style="margin-top: 40px;">
          <h3 class="subsection-title">
@@ -305,6 +375,11 @@
             localStorage.removeItem('token_auto_empeno');
             window.location.href = 'login.html';
         });
+    }
+
+    // Función para cerrar el panel
+    window.cerrarEdicion = function() {
+        document.getElementById('seccion-editar-cliente').style.display = 'none';
     }
   </script>
 </body>
