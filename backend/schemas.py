@@ -162,3 +162,8 @@ class EdicionCompletaRequest(BaseModel):
     estado: EstadoEmpeno
     fecha_empeno: date
     fecha_vencimiento: date
+
+# --- SCHEMA PARA REGISTRO SEGURO DE EMPLEADOS ---
+class RegistroEmpleadoRequest(BaseModel):
+    nuevo_usuario: UsuarioCreate
+    admin_password: str

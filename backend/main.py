@@ -211,3 +211,42 @@ def editar_empeno(
     if not resultado:
         raise HTTPException(status_code=404, detail="Empeño no encontrado")
     return {"mensaje": "Datos actualizados correctamente", "data": resultado}
+
+# --- RUTA PARA REGISTRAR EMPLEADO (CON SEGURIDAD) ---
+@app.post("/registrar-empleado-seguro")
+def registrar_empleado_seguro(
+    datos: schemas.RegistroEmpleadoRequest, 
+    db: Session = Depends(get_db)
+):
+    # 1. Buscar al "Jefe" (Usuario admin) para verificar su firma
+    # Asumimos que el usuario principal se llama 'admin'
+    admin_user = crud.get_user_by_username(db, "admin")
+    
+    if not admin_user:
+        raise HTTPException(
+            status_code=400, 
+            detail="Error crítico: No existe el usuario 'admin' para autorizar."
+        )
+
+    # 2. Verificar si la contraseña maestra es correcta
+    # Usamos la función de security que ya tienes importada
+    if not security.verify_password(datos.admin_password, admin_user.hashed_password):
+        raise HTTPException(
+            status_code=401, 
+            detail="⛔ Autorización denegada: Contraseña de Admin incorrecta."
+        )
+
+    # 3. Verificar que el nuevo usuario no exista ya
+    if crud.get_user_by_username(db, datos.nuevo_usuario.usuario):
+        raise HTTPException(
+            status_code=400, 
+            detail="El nombre de usuario ya está ocupado."
+        )
+
+    # 4. Si todo está bien, creamos al empleado
+    nuevo_empleado = crud.create_user(db, datos.nuevo_usuario)
+    
+    return {
+        "mensaje": f"Empleado '{nuevo_empleado.usuario}' registrado exitosamente.",
+        "id": nuevo_empleado.id
+    }
