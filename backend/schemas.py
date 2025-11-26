@@ -1,10 +1,12 @@
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List
 from datetime import date, datetime
-from decimal import Decimal # IMPORTANTE para dinero exacto
+from decimal import Decimal
 from enum import Enum
 
-# --- ENUMS (Iguales a models.py) ---
+# ==========================================
+# 1. ENUMS
+# ==========================================
 class RolUsuario(str, Enum):
     admin = "admin"
     empleado = "empleado"
@@ -14,6 +16,7 @@ class EstadoEmpeno(str, Enum):
     vencido = "Vencido"
     desempenado = "Desempeñado"
     rematado = "Rematado"
+    vendido = "Vendido"
     perdido = "Perdido"
 
 class TipoMovimiento(str, Enum):
@@ -23,26 +26,49 @@ class TipoMovimiento(str, Enum):
     venta = "Venta Remate"
     reevaluo = "Reevaluo"
 
-# --- ESQUEMAS DE MOVIMIENTOS DE CAJA ---
+# ==========================================
+# 2. MOVIMIENTOS DE CAJA (Independientes)
+# ==========================================
 class MovimientoCajaBase(BaseModel):
     tipo_movimiento: TipoMovimiento
-    monto: Decimal = Field(..., max_digits=10, decimal_places=2) # Validación extra
+    monto: Decimal = Field(..., max_digits=10, decimal_places=2)
     nota: Optional[str] = None
 
 class MovimientoCajaCreate(MovimientoCajaBase):
     empeno_id: int
-    # El usuario_id viene del token, no del JSON
 
 class MovimientoCaja(MovimientoCajaBase):
     id: int
     usuario_id: int
     fecha_movimiento: datetime
-
-    # Configuración Pydantic V2
     model_config = ConfigDict(from_attributes=True)
 
+# ==========================================
+# 3. CLIENTE BASE (El Padre de todos)
+# ==========================================
+# ¡IMPORTANTE! Este va PRIMERO para que los demás puedan usarlo
+class ClienteBase(BaseModel):
+    nombre: str
+    apellidos: str
+    telefono: Optional[str] = Field(None, max_length=20)
+    ine: Optional[str] = Field(None, max_length=20)
+    direccion: Optional[str] = None
 
-# --- ESQUEMAS DE EMPEÑOS ---
+class ClienteCreate(ClienteBase):
+    pass
+
+# ==========================================
+# 4. CLIENTE SIMPLE (Hijo de ClienteBase)
+# ==========================================
+# Versión ligera sin lista de empeños (para romper bucles)
+class ClienteSimple(ClienteBase):
+    id: int
+    fecha_registro: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+# ==========================================
+# 5. EMPEÑOS (Usan ClienteSimple)
+# ==========================================
 class EmpenoBase(BaseModel):
     categoria: str
     marca_modelo: str
@@ -50,7 +76,6 @@ class EmpenoBase(BaseModel):
     num_serie_peso: Optional[str] = None
     observaciones: Optional[str] = None
     
-    # Usamos Decimal en lugar de float para evitar errores de redondeo
     valor_valuo: Decimal = Field(..., gt=0) 
     monto_prestamo: Decimal = Field(..., gt=0)
     interes_mensual_pct: Optional[Decimal] = Decimal("10.0")
@@ -70,44 +95,30 @@ class Empeno(EmpenoBase):
     cliente_id: int
     estado: EstadoEmpeno
     
-    # Estos campos se calculan en el backend antes de responder
-    #cliente: Optional["Cliente"] = None
+    # Aquí usamos al ClienteSimple (que ya fue definido arriba)
+    cliente: Optional[ClienteSimple] = None 
+    
     monto_refrendo: Optional[Decimal] = None 
     total_desempeno: Optional[Decimal] = None 
-    
     movimientos: List[MovimientoCaja] = []
 
     model_config = ConfigDict(from_attributes=True)
 
-
-# --- ESQUEMAS DE CLIENTES ---
-class ClienteBase(BaseModel):
-    nombre: str
-    apellidos: str
-    # Validaciones útiles: max_length asegura que quepa en la BD
-    telefono: Optional[str] = Field(None, max_length=20)
-    ine: Optional[str] = Field(None, max_length=20)
-    direccion: Optional[str] = None
-
-class ClienteCreate(ClienteBase):
-    pass
-
-class Cliente(ClienteBase):
-    id: int
-    fecha_registro: datetime
-    # Devuelve la lista de empeños de este cliente
+# ==========================================
+# 6. CLIENTE COMPLETO (Usa Empeno)
+# ==========================================
+# Este va al final porque necesita que 'Empeno' ya exista
+class Cliente(ClienteSimple):
     empenos: List[Empeno] = [] 
-
     model_config = ConfigDict(from_attributes=True)
 
-
-# --- ESQUEMAS PARA CREACIÓN COMPUESTA ---
+# ==========================================
+# 7. OTROS ESQUEMAS (Requests y Usuarios)
+# ==========================================
 class NuevoEmpenoRequest(BaseModel):
     cliente: ClienteCreate
     empeno: EmpenoCreate
 
-
-# --- ESQUEMAS DE USUARIOS / LOGIN ---
 class UsuarioBase(BaseModel):
     usuario: str
     nombre_completo: str
@@ -120,7 +131,6 @@ class Usuario(UsuarioBase):
     id: int
     activo: bool
     fecha_creacion: datetime
-
     model_config = ConfigDict(from_attributes=True)
 
 class Token(BaseModel):
@@ -130,8 +140,10 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
-    # --- Agrega esto al final de schemas.py ---
 class ReevaluoRequest(BaseModel):
     nuevo_prestamo: float
     nuevo_valuo: float
     nuevo_interes: float
+    
+class VentaRequest(BaseModel):
+    precio_venta: float

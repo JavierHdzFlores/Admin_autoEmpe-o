@@ -201,38 +201,57 @@
     }
 
     // --- 3. RENDERIZAR TABLA (Ya lo tenías) ---
-    function renderizarTabla(listaDatos) {
-      const tbody = document.getElementById('tabla-clientes-body');
-      tbody.innerHTML = '';
+// --- 2. DIBUJAR TABLA (Con Nombres Reales) ---
+  function renderizarTabla(listaDatos) {
+    const tbody = document.getElementById('tabla-clientes-body');
+    tbody.innerHTML = '';
 
-      if (listaDatos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No se encontraron registros.</td></tr>';
-        return;
+    if (listaDatos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">No hay registros.</td></tr>';
+      return;
+    }
+
+    listaDatos.forEach(item => {
+      const tr = document.createElement('tr');
+      
+      // --- AQUÍ ESTÁ LA MAGIA PARA EL NOMBRE ---
+      let nombreMostrado = `Cliente #${item.cliente_id}`; // Valor por defecto
+      
+      // Verificamos si el backend nos mandó los datos del cliente
+      if (item.cliente && item.cliente.nombre) {
+          nombreMostrado = `${item.cliente.nombre} ${item.cliente.apellidos}`;
+      }
+      // -----------------------------------------
+
+      const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.monto_prestamo);
+      const estadoClass = item.estado.toLowerCase();
+
+      // Lógica del botón de remate (que ya tenías)
+      let botonAccion = '';
+      if (item.estado === 'Vencido') {
+          botonAccion = `
+            <button class="btn-rematar" onclick="enviarARemate(${item.id}, '${item.marca_modelo}')">
+               📢 Rematar
+            </button>`;
+      } else if (item.estado === 'Rematado') {
+          botonAccion = '<span style="color:orange; font-size:0.8em;">En Remate</span>';
+      } else {
+          botonAccion = '<span style="color:#ccc;">-</span>';
       }
 
-      listaDatos.forEach(item => {
-        const tr = document.createElement('tr');
-        
-        let nombreCliente = `Cliente #${item.cliente_id}`;
-        if (item.cliente) {
-            nombreCliente = `${item.cliente.nombre} ${item.cliente.apellidos}`;
-        }
-
-        const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.monto_prestamo);
-        const estadoClass = item.estado.toLowerCase();
-
-        tr.innerHTML = `
-          <td><strong>${nombreCliente}</strong></td> 
-          <td>${item.id}</td>
-          <td>${item.marca_modelo}</td>
-          <td>${montoFmt}</td>
-          <td>${item.fecha_empeno}</td>
-          <td>${item.fecha_vencimiento}</td>
-          <td><span class="status status-${estadoClass}">${item.estado}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+      tr.innerHTML = `
+        <td style="font-weight: bold; color: #113b64;">${nombreMostrado}</td> 
+        <td>${item.id}</td>
+        <td>${item.marca_modelo}</td>
+        <td>${montoFmt}</td>
+        <td>${item.fecha_empeno}</td>
+        <td>${item.fecha_vencimiento}</td>
+        <td><span class="status status-${estadoClass}">${item.estado}</span></td>
+        <td style="text-align:center;">${botonAccion}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
     // --- 4. FILTROS (Ya lo tenías, se mantiene igual) ---
     function filtrarDatos() {
