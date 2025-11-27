@@ -213,8 +213,9 @@
             </div>
 
             <div class="form-actions" style="margin-top: 20px;">
-                <button type="button" class="btn-secondary" onclick="cerrarEdicion()">Cancelar</button>
-                <button type="submit" class="btn-primary">Guardar Cambios</button>
+              <button type="button" class="btn-secondary" onclick="cerrarEdicion()">Cancelar</button>
+              <button type="button" id="btn-editar" class="btn-primary" style="display:none; margin-left:8px;" onclick="habilitarEdicion()">Editar</button>
+              <button type="submit" class="btn-primary">Guardar Cambios</button>
             </div>
         </form>
       </div>
@@ -518,7 +519,7 @@
       document.getElementById('edit-fecha-empeno').value = item.fecha_empeno;
       document.getElementById('edit-fecha-vencimiento').value = item.fecha_vencimiento;
 
-      // 3. MOSTRAR EL FORMULARIO (Quitamos el display: none)
+        // 3. MOSTRAR EL FORMULARIO (Quitamos el display: none)
         const seccion = document.getElementById('seccion-editar-cliente');
         seccion.style.display = 'block';
 
@@ -533,15 +534,48 @@
         });
 
         // Ocultar el botón de guardar cambios (lo dejamos para futura edición)
-        const btnGuardar = form.querySelector('button[type="submit"], .btn-primary');
+        const btnGuardar = form.querySelector('button[type="submit"]');
+        const btnEditar = document.getElementById('btn-editar');
         if (btnGuardar) btnGuardar.style.display = 'none';
+        if (btnEditar) btnEditar.style.display = 'inline-block';
 
         // Hacemos scroll suave hacia el formulario para que el usuario lo vea
         seccion.scrollIntoView({ behavior: 'smooth' });
   };
     // Función para cerrar el panel
     window.cerrarEdicion = function() {
-        document.getElementById('seccion-editar-cliente').style.display = 'none';
+      document.getElementById('seccion-editar-cliente').style.display = 'none';
+      // Restaurar estado: ocultar botón editar y mostrar guardar por defecto
+      const form = document.getElementById('form-editar');
+      const btnEditar = document.getElementById('btn-editar');
+      const btnGuardar = form.querySelector('button[type="submit"]');
+      if (btnEditar) btnEditar.style.display = 'none';
+      if (btnGuardar) btnGuardar.style.display = '';
+      // Asegurarnos que los inputs queden habilitados para la siguiente apertura normal
+      const elementos = form.querySelectorAll('input, select, textarea');
+      elementos.forEach(el => {
+        el.disabled = false;
+        el.tabIndex = 0;
+      });
+    }
+    
+    // Habilita la edición dentro del panel: muestra botón Guardar y habilita inputs
+    window.habilitarEdicion = function() {
+      const form = document.getElementById('form-editar');
+      const elementos = form.querySelectorAll('input, select, textarea');
+      elementos.forEach(el => {
+        el.disabled = false;
+        el.tabIndex = 0;
+      });
+
+      const btnEditar = document.getElementById('btn-editar');
+      const btnGuardar = form.querySelector('button[type="submit"]');
+      if (btnEditar) btnEditar.style.display = 'none';
+      if (btnGuardar) btnGuardar.style.display = '';
+
+      // Poner foco en el primer campo editable
+      const first = form.querySelector('input:not([type="hidden"]):not([disabled])');
+      if (first) first.focus();
     }
   // --- GUARDAR CAMBIOS (EDICIÓN) ---
   const formEditar = document.getElementById('form-editar');
