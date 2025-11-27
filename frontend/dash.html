@@ -145,37 +145,69 @@
                 const tbody = document.getElementById('tabla-acciones-body');
                 tbody.innerHTML = ''; 
 
-                if (filas.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sin movimientos recientes</td></tr>';
+                // Log para depuración: ver qué trae el backend
+                console.debug('Dashboard - filas recibidas:', filas);
+
+                // Limpiar tbody de forma segura
+                while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+
+                if (!filas || filas.length === 0) {
+                  const trEmpty = document.createElement('tr');
+                  const tdEmpty = document.createElement('td');
+                  tdEmpty.colSpan = 5;
+                  tdEmpty.style.textAlign = 'center';
+                  tdEmpty.textContent = 'Sin movimientos recientes';
+                  trEmpty.appendChild(tdEmpty);
+                  tbody.appendChild(trEmpty);
                 } else {
-                    filas.forEach(fila => {
-                        const tr = document.createElement('tr');
-                        
-                        // LÓGICA DE COLORES SEGÚN ACCIÓN
-                        let badgeClass = 'status-vigente'; // Por defecto
-                        let signo = '+'; // Dinero entra
-                        
-                        if (fila.accion === 'Nuevo Empeño') {
-                            badgeClass = 'status-nuevo'; // Azul
-                            signo = '-'; // Dinero sale (prestamos)
-                        } else if (fila.accion === 'Desempeño' || fila.accion === 'Venta Remate') {
-                            badgeClass = 'status-desempeno'; // Verde (Liquidación)
-                        } else if (fila.accion === 'Refrendo') {
-                            badgeClass = 'status-refrendo'; // Naranja
-                        }
+                  filas.forEach(fila => {
+                    const tr = document.createElement('tr');
 
-                        // Formato de moneda
-                        const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(fila.monto);
+                    // Normalizar acción para comparaciones más tolerantes
+                    const accionNorm = (fila.accion || '').toString().toLowerCase().trim();
 
-                        tr.innerHTML = `
-                            <td><span style="font-weight:bold; color:#555;">${fila.cliente}</span></td>
-                            <td><span class="status ${badgeClass}">${fila.accion}</span></td>
-                            <td>${fila.articulo}</td>
-                            <td style="font-weight:bold;">${signo} ${montoFmt}</td>
-                            <td>${fila.fecha}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
+                    // LÓGICA DE COLORES SEGÚN ACCIÓN (más flexible)
+                    let badgeClass = 'status-vigente'; // Por defecto
+                    let signo = '+'; // Dinero entra
+
+                    if (accionNorm.includes('nuevo')) {
+                      badgeClass = 'status-nuevo';
+                      signo = '-';
+                    } else if (accionNorm.includes('desempe') || accionNorm.includes('venta')) {
+                      badgeClass = 'status-desempeno';
+                    } else if (accionNorm.includes('refrendo')) {
+                      badgeClass = 'status-refrendo';
+                    }
+
+                    // Formato de moneda (asegurarnos número)
+                    const montoVal = Number(fila.monto) || 0;
+                    const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(montoVal);
+
+                    // Construir celdas de forma segura
+                    const tdCliente = document.createElement('td');
+                    const spanCliente = document.createElement('span');
+                    spanCliente.style.fontWeight = 'bold'; spanCliente.style.color = '#555';
+                    spanCliente.textContent = fila.cliente || '';
+                    tdCliente.appendChild(spanCliente);
+
+                    const tdAccion = document.createElement('td');
+                    const spanAcc = document.createElement('span');
+                    spanAcc.className = 'status ' + badgeClass;
+                    spanAcc.textContent = fila.accion || '';
+                    tdAccion.appendChild(spanAcc);
+
+                    const tdArticulo = document.createElement('td'); tdArticulo.textContent = fila.articulo || '';
+                    const tdMonto = document.createElement('td'); tdMonto.style.fontWeight = 'bold'; tdMonto.textContent = `${signo} ${montoFmt}`;
+                    const tdFecha = document.createElement('td'); tdFecha.textContent = fila.fecha || '';
+
+                    tr.appendChild(tdCliente);
+                    tr.appendChild(tdAccion);
+                    tr.appendChild(tdArticulo);
+                    tr.appendChild(tdMonto);
+                    tr.appendChild(tdFecha);
+
+                    tbody.appendChild(tr);
+                  });
                 }
             } else {
                 console.error('Error al cargar tabla de acciones rápidas');
