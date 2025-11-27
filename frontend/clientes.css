@@ -421,10 +421,24 @@ table tbody tr:nth-child(even) {
 }
 
 /* Botón primario (Guardar) */
+/* Botón primario (Guardar, Buscar, SELECCIONAR de la tabla) */
 .btn-primary {
+  padding: 10px 20px; /* Ajustado el padding */
   background-color: var(--color-amarillo);
   color: var(--color-azul-oscuro);
-  border-radius: 10px;
+  border-radius: 8px; /* Menos redondeado para más modernidad */
+  border: none; /* <-- ¡CLAVE! QUITAR EL BORDE NEGRO */
+  font-size: 14px; /* Un poco más pequeño para la tabla */
+  font-weight: 600;
+  font-family: var(--font-secundaria);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+}
+.btn-primary:hover {
+  background-color: var(--color-azul-oscuro);
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra más fuerte al pasar */
+  transform: translateY(-1px); /* Efecto de "levantar" */
 }
 .btn-primary:hover {
   background-color: var(--color-azul-oscuro);
@@ -1113,3 +1127,24 @@ table tbody tr:nth-child(even) {
       font-weight: bold;
       color: #333;
   }
+
+  /* --- BOTÓN BUSCAR (Filtros) --- */
+.search-form .btn-primary, /* Añadido para clientes */
+.filters .btn-primary { /* La clase principal del botón Buscar */
+  background-color: var(--color-amarillo);
+  color: var(--color-azul-oscuro);
+  /* width: 130px; Ya no es necesario si se adapta al padding */
+  padding: 10px 20px; /* Ajustado el padding para hacerlo más alto */
+  font-size: 15px;
+  /* YA TENÍAN border-radius: 10px, pero nos aseguramos */
+  border-radius: 8px; /* Un poco menos para que sea más sutil */
+  height: 42px; /* Misma altura que los inputs para alinear */
+  border: none; /* <-- ¡CLAVE! QUITAR EL BORDE NEGRO */
+  font-family: var(--font-secundaria);
+}
+
+.search-form .btn-primary:hover,
+.filters .btn-primary:hover {
+  background-color: var(--color-azul-oscuro); /* Invertimos al pasar */
+  color: white;
+}
