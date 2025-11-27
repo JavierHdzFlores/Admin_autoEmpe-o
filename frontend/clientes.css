@@ -424,6 +424,7 @@ table tbody tr:nth-child(even) {
 .btn-primary {
   background-color: var(--color-amarillo);
   color: var(--color-azul-oscuro);
+  border-radius: 10px;
 }
 .btn-primary:hover {
   background-color: var(--color-azul-oscuro);
