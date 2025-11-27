@@ -140,7 +140,7 @@ body {
   outline: none;
 }
 
-.login-button {
+.login-btn {
   width: 100%;
   padding: 14px;
   background-color: #f5b301;
@@ -155,13 +155,13 @@ body {
   margin-top: 10px;
 }
 
-.login-button:hover {
+.login-btn:hover {
   background-color: #113b64;
   color: white;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-.error-message {
+.error-msg {
   color: #D8000C;
   background-color: #FFD2D2;
   border: 1px solid #D8000C;
@@ -171,6 +171,27 @@ body {
   font-family: Arial, sans-serif;
   display: none;
   margin-top: 20px;
+}
+
+.create-user-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #f5b301;
+  color: #113b64;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  margin-top: 10px;
+}
+
+.create-user-btn:hover {
+  background-color: #113b64;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 
@@ -230,3 +251,30 @@ body {
     font-size: 26px;
   }
 }
+
+.hidden {
+      display: none;
+    }
+    
+    .switch-link {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 0.9em;
+      color: #555;
+    }
+    
+    .switch-link a {
+      color: #113b64;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    
+    .switch-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* Estilo para el campo de contraseña maestra (importante) */
+    .master-pass-group input {
+      border: 2px solid #f5b301; /* Borde amarillo para resaltar seguridad */
+    }

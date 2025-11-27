@@ -5,35 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Acceso - Auto Empeño Luna</title>
   <link rel="stylesheet" href="login.css">
-  <style>
-    /* Estilos extra para la transición entre formularios */
-    .hidden {
-      display: none;
-    }
-    
-    .switch-link {
-      margin-top: 15px;
-      text-align: center;
-      font-size: 0.9em;
-      color: #555;
-    }
-    
-    .switch-link a {
-      color: #113b64;
-      font-weight: bold;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    
-    .switch-link a:hover {
-      text-decoration: underline;
-    }
-
-    /* Estilo para el campo de contraseña maestra (importante) */
-    .master-pass-group input {
-      border: 2px solid #f5b301; /* Borde amarillo para resaltar seguridad */
-    }
-  </style>
 </head>
 <body>
 
@@ -66,7 +37,7 @@
           <input type="password" id="contrasena" name="contrasena" required placeholder="••••••">
         </div>
   
-        <button type="submit" class="login-btn">Entrar al Sistema</button>
+        <button type="submit" class="login-btn">Ingresar</button>
         
         <p id="error-message" class="error-msg" style="display: none;"></p>
 
@@ -105,7 +76,7 @@
             <small style="font-size: 0.7em; color: #888;">Necesaria para autorizar el registro.</small>
         </div>
 
-        <button type="submit" class="login-btn" style="background: #2a5a8a;">Crear Usuario</button>
+        <button type="submit" class="create-user-btn" ">Crear Usuario</button>
         
         <p id="reg-error-message" class="error-msg" style="display: none;"></p>
 
