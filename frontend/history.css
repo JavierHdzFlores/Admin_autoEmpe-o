@@ -818,7 +818,7 @@ table tbody tr:nth-child(even) {
   border-radius: 12px;
   font-size: 12px;
   font-weight: bold;
-  color: white;
+  color: black;
   display: inline-block;
   text-align: center;
 }

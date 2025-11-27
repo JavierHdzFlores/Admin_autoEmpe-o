@@ -73,8 +73,9 @@
           <thead>
             <tr>
               <th>Folio</th>
+              <th>Cliente</th>
               <th>Artículo</th>
-              <th>Precio en venta</th> 
+              <th>Precio en venta (Sugerido)</th> 
               <th>Precio adquirido</th>
               <th>Fecha Ingreso</th>
               <th>Estado</th>
@@ -156,29 +157,40 @@
 
       lista.forEach(item => {
         const tr = document.createElement('tr');
-        
-        // Lógica visual: Si dice "Rematado" en BD, mostramos "En Venta" en pantalla
+
+        // Preparar datos seguros
+        const folio = item.id;
+        const clienteNombre = item.cliente ? `${item.cliente.nombre || ''} ${item.cliente.apellidos || ''}`.trim() : (item.cliente_id ? `Cliente #${item.cliente_id}` : '-');
+        const articulo = item.marca_modelo || '-';
+        const precioSugerido = (item.monto_prestamo ? item.monto_prestamo * 1.5 : 0); // Sugerido: 150% del préstamo
+        const precioAdquirido = item.precio_venta || item.precio_adquirido || '-';
+        // Fecha de ingreso: preferimos campo explícito, si no usamos fecha_empeno
+        const fechaIngreso = item.fecha_ingreso || item.fecha_empeno || item.fecha_vencimiento || '-';
+
+        // Estado y acción
         let etiquetaEstado = '';
         let botonAccion = '';
-        let precioSugerido = item.monto_prestamo * 1.5; // Ejemplo: Se vende al 150% del préstamo
 
         if (item.estado === 'Rematado') {
-            etiquetaEstado = '<span class="status status-rematado">En Venta</span>'; // Usamos clase visual
-            // Botón para vender
+            etiquetaEstado = '<span class="status status-rematado">En Venta</span>';
             botonAccion = `
-              <button class="btn-vender" onclick="venderArticulo(${item.id}, '${item.marca_modelo}', ${precioSugerido})">
-                  💲 Vender
-              </button>`;
+              <button class="btn-vender" onclick="venderArticulo(${item.id}, '${escapeHtml(articulo)}', ${precioSugerido})">💲 Vender</button>`;
         } else if (item.estado === 'Vendido') {
             etiquetaEstado = '<span class="status status-vendido">Vendido</span>';
-            botonAccion = '<span style="color:grey; font-size:0.8em;">Venta Finalizada</span>';
+            botonAccion = `<span style="color:grey; font-size:0.9em;">$${(typeof precioAdquirido === 'number' ? precioAdquirido.toFixed(2) : precioAdquirido)}</span>`;
+        } else {
+            etiquetaEstado = `<span class=\"status\">${item.estado || '-'}</span>`;
+            botonAccion = '';
         }
 
         tr.innerHTML = `
-          <td>${item.id}</td>
-          <td style="font-weight:bold;">${item.marca_modelo}</td>
+          <td>${folio}</td>
+          <td style="font-weight:bold;">${escapeHtml(clienteNombre)}</td>
+          <td>${escapeHtml(articulo)}</td>
           <td>$${precioSugerido.toFixed(2)}</td>
-          <td>${item.fecha_vencimiento}</td> <td>${etiquetaEstado}</td>
+          <td>${(typeof precioAdquirido === 'number') ? ('$' + precioAdquirido.toFixed(2)) : precioAdquirido}</td>
+          <td>${fechaIngreso}</td>
+          <td>${etiquetaEstado}</td>
           <td>${botonAccion}</td>
         `;
         tbody.appendChild(tr);
@@ -188,12 +200,14 @@
     // 3. BUSCADOR
     const inputBus = document.getElementById('busqueda-remate');
     inputBus.addEventListener('input', (e) => {
-        const texto = e.target.value.toLowerCase();
-        const filtrados = inventarioRemates.filter(item => 
-            item.marca_modelo.toLowerCase().includes(texto) || 
-            item.id.toString().includes(texto)
-        );
-        renderizarTabla(filtrados);
+      const texto = e.target.value.toLowerCase();
+      const filtrados = inventarioRemates.filter(item => {
+        const clienteNombre = item.cliente ? `${item.cliente.nombre || ''} ${item.cliente.apellidos || ''}`.toLowerCase() : '';
+        const marca = (item.marca_modelo || '').toLowerCase();
+        const folio = item.id ? item.id.toString() : '';
+        return clienteNombre.includes(texto) || marca.includes(texto) || folio.includes(texto);
+      });
+      renderizarTabla(filtrados);
     });
 
     // 4. FUNCIÓN VENDER
@@ -221,6 +235,16 @@
         } catch (e) {
             alert("Error de conexión");
         }
+    }
+    // Utility: escapar texto para evitar inyección en innerHTML (muy básico)
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
     }
   </script>
 
