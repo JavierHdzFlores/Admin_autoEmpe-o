@@ -519,10 +519,25 @@
       document.getElementById('edit-fecha-vencimiento').value = item.fecha_vencimiento;
 
       // 3. MOSTRAR EL FORMULARIO (Quitamos el display: none)
-      document.getElementById('seccion-editar-cliente').style.display = 'block';
-      
-      // Hacemos scroll suave hacia el formulario para que el usuario lo vea
-      document.getElementById('seccion-editar-cliente').scrollIntoView({ behavior: 'smooth' });
+        const seccion = document.getElementById('seccion-editar-cliente');
+        seccion.style.display = 'block';
+
+        // Deshabilitar edición: marcamos todos los inputs/select como readonly/disabled
+        const form = document.getElementById('form-editar');
+        const elementos = form.querySelectorAll('input, select, textarea');
+        elementos.forEach(el => {
+          // no queremos que el usuario modifique por ahora
+          el.disabled = true;
+          // además, quitamos enfoque accidental
+          el.tabIndex = -1;
+        });
+
+        // Ocultar el botón de guardar cambios (lo dejamos para futura edición)
+        const btnGuardar = form.querySelector('button[type="submit"], .btn-primary');
+        if (btnGuardar) btnGuardar.style.display = 'none';
+
+        // Hacemos scroll suave hacia el formulario para que el usuario lo vea
+        seccion.scrollIntoView({ behavior: 'smooth' });
   };
     // Función para cerrar el panel
     window.cerrarEdicion = function() {
