@@ -539,8 +539,11 @@
         if (btnGuardar) btnGuardar.style.display = 'none';
         if (btnEditar) btnEditar.style.display = 'inline-block';
 
-        // Hacemos scroll suave hacia el formulario para que el usuario lo vea
-        seccion.scrollIntoView({ behavior: 'smooth' });
+          // Hacemos scroll suave hacia el formulario para que el usuario lo vea
+          seccion.scrollIntoView({ behavior: 'smooth' });
+
+          // Actualizar las cards para mostrar solo los empeños de este cliente
+          actualizarEstadisticasParaCliente(item);
   };
     // Función para cerrar el panel
     window.cerrarEdicion = function() {
@@ -576,6 +579,36 @@
       // Poner foco en el primer campo editable
       const first = form.querySelector('input:not([type="hidden"]):not([disabled])');
       if (first) first.focus();
+    }
+    
+    // Normaliza cadenas para comparación (quita espacios extras y pasa a minúsculas)
+    function _normalizaCadena(s) {
+      return (s || '').toString().toLowerCase().trim().replace(/\s+/g, ' ');
+    }
+
+    // Actualiza las cards (estadísticas) para un cliente específico.
+    // Prioriza comparar por cliente_id; si no existe, compara nombre+apellidos+dirección.
+    function actualizarEstadisticasParaCliente(item) {
+      if (!item) return calcularEstadisticas(todosLosEmpenos);
+
+      const clienteId = item.cliente_id || (item.cliente && item.cliente.id);
+      let nombre = item.cliente ? _normalizaCadena(item.cliente.nombre) : _normalizaCadena(document.getElementById('edit-nombre').value);
+      let apellidos = item.cliente ? _normalizaCadena(item.cliente.apellidos) : _normalizaCadena(document.getElementById('edit-apellidos').value);
+      let direccion = item.cliente ? _normalizaCadena(item.cliente.direccion || '') : _normalizaCadena(document.getElementById('edit-direccion').value || '');
+
+      let coincidencias = [];
+
+      if (clienteId) {
+        coincidencias = todosLosEmpenos.filter(e => e.cliente_id === clienteId);
+      } else {
+        coincidencias = todosLosEmpenos.filter(e => {
+          if (!e.cliente) return false;
+          return _normalizaCadena(e.cliente.nombre) === nombre && _normalizaCadena(e.cliente.apellidos || '') === apellidos && _normalizaCadena(e.cliente.direccion || '') === direccion;
+        });
+      }
+
+      // Si no encontramos resultados en la memoria, mostramos 0s (evita mezclar otros clientes)
+      calcularEstadisticas(coincidencias);
     }
   // --- GUARDAR CAMBIOS (EDICIÓN) ---
   const formEditar = document.getElementById('form-editar');
