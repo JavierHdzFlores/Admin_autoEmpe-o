@@ -330,7 +330,10 @@
       // 1. Botón Editar (Siempre visible) - Usamos el ID para buscar los datos luego
       botones += `
         <button class="btn-icon btn-edit" onclick="abrirEdicion(${item.id})" title="Ver/Editar Detalles">
-            Editar 
+            Editar
+        </button>
+        <button class="btn-select btn-primary" onclick="abrirEdicion(${item.id})" title="Seleccionar">
+            Seleccionar
         </button>
       `;
 
