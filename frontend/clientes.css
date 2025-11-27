@@ -861,7 +861,7 @@
   border-radius: 12px;
   font-size: 12px;
   font-weight: bold;
-  color: white; /* Cambiado a blanco para mejor contraste en azul/gris/rojo */
+  color:#000; /* Cambiado a blanco para mejor contraste en azul/gris/rojo */
   display: inline-block;
   text-align: center;
 }
