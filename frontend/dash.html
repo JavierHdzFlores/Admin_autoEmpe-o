@@ -135,7 +135,7 @@
         try {
             // ... dentro de cargarDashboard ...
 
-            // 2. Cargar Tabla de Acciones Rápidas
+            // 2. Cargar Tabla de Acciones Rápidas esta ya funciona no le muevas nada
             const resTabla = await fetch('/dashboard/tabla', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -179,6 +179,36 @@
                 }
             } else {
                 console.error('Error al cargar tabla de acciones rápidas');
+            }
+  
+            // 1. Cargar estadísticas del dashboard
+            // Pedimos TODOS los empeños existentes
+            // (Usamos el endpoint básico que ya existe, no el de KPIs)
+            const resTodos = await fetch('/empenos', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (resTodos.ok) {
+                const todos = await resTodos.json();
+                
+                // --- A. CÁLCULOS ---
+
+                // Total de Empeños
+                document.getElementById('stat-total').innerText = todos.length;
+
+                // 1. Empeños Activos (Vigentes + Vencidos)
+                const activos = todos.filter(e => e.estado === 'Vigente' || e.estado === 'Vencido');
+                const cantidadActivos = activos.length;
+                document.getElementById('stat-activos').innerText = cantidadActivos;
+                // 2. Artículos Desempeñados
+                const desempenados = todos.filter(item => item.estado === 'Desempeñado').length;
+                document.getElementById('stat-desempenados').innerText = desempenados;
+
+                // 4. En remate
+                const perdidos = todos.filter(item => 
+                    item.estado === 'Rematado' || item.estado === 'Vendido'
+                ).length;
+                document.getElementById('stat-perdidos').innerText = perdidos;
             }
 
         } catch (error) {
