@@ -199,7 +199,7 @@
     let capitalGlobal = 0;
     let interesGlobal = 0;
     
-    // --- NUEVAS FUNCIONES DE FECHA (Copiadas de Refrendo) ---
+    // --- FUNCIONES DE CÁLCULO DE FECHA ---
 
     /**
      * @description Calcula los días enteros de diferencia entre dos fechas, 
@@ -254,7 +254,7 @@
         };
     }
 
-    // --- 1. BUSCADOR (Igual que antes) ---
+    // --- 1. LÓGICA DE BÚSQUEDA Y POBLADO DE TABLA ---
     const btnBuscar = document.getElementById('btn-buscar');
     const inputBusqueda = document.getElementById('busqueda-input');
     const tbody = document.getElementById('tabla-resultados-body');
@@ -267,6 +267,7 @@
             });
             
             if (!res.ok) {
+                // Si el servidor responde con un error HTTP
                 alert("Error al buscar clientes.");
                 return;
             }
@@ -281,7 +282,6 @@
 
             clientes.forEach(c => {
                 if(c.empenos) c.empenos.forEach(e => {
-                    // Calculamos el estado actual para mostrarlo en la tabla
                     const { estado } = calcularEstadoYRetraso(e.fecha_vencimiento);
                     const estadoClass = estado.toLowerCase().replace(/ñ/g, 'n'); 
                     
@@ -289,14 +289,17 @@
                         const tr = document.createElement('tr');
                         const nombreCompleto = `${c.nombre} ${c.apellidos}`;
                         
+                        // CORRECCIÓN: Aseguramos que el monto sea un número para toFixed()
+                        const montoFormateado = parseFloat(e.monto_prestamo).toFixed(2);
+                        
                         tr.innerHTML = `
                             <td>
                                 <button class="btn-select" 
                                     onclick="calcularLiquidacion(
                                         ${e.id}, 
-                                        ${e.monto_prestamo}, 
+                                        '${e.monto_prestamo}', // Pasamos como string para manejarlo en la función
                                         '${e.fecha_vencimiento}', 
-                                        ${e.interes_mensual_pct},
+                                        '${e.interes_mensual_pct}', // Pasamos como string
                                         '${nombreCompleto}',
                                         '${e.marca_modelo}'
                                     )">
@@ -305,7 +308,7 @@
                             </td>
                             <td>${e.id}</td>
                             <td>${e.marca_modelo}</td>
-                            <td>$${e.monto_prestamo.toFixed(2)}</td>
+                            <td>$${montoFormateado}</td>
                             <td><span class="status status-${estadoClass}">${estado}</span></td>
                         `;
                         tbody.appendChild(tr);
@@ -319,8 +322,13 @@
     });
 
     // --- 2. FUNCIÓN PRINCIPAL DE CÁLCULO (Liquidación) ---
-    window.calcularLiquidacion = function(id, capital, fechaVencStr, tasaInteres, nombreCliente, nombreArticulo) {
+    window.calcularLiquidacion = function(id, capitalStr, fechaVencStr, tasaInteresStr, nombreCliente, nombreArticulo) {
         empenoSeleccionadoId = id;
+        
+        // CONVERSIÓN CRUCIAL: Aseguramos que sean números para operar
+        const capital = parseFloat(capitalStr);
+        const tasaInteres = parseFloat(tasaInteresStr);
+
         capitalGlobal = capital;
 
         // A. Llenar Datos Visuales (Arriba)
@@ -359,9 +367,10 @@
 
         } else if (estado === 'Vencido') {
             // Entre 1 y 5 días de gracia
-            const recargoPorDia = 10; // $10 de recargo por día (ajusta si es diferente al refrendo)
+            const recargoPorDia = 10; 
             const recargoTotal = diasRetraso * recargoPorDia;
 
+            // Muestra días exactos
             document.getElementById('resumen-dias').innerText = `${diasRetraso} días de gracia`;
             document.getElementById('resumen-dias').style.color = 'orange';
             
@@ -384,7 +393,7 @@
         recalcularTotal();
     };
 
-    // --- 3. RECALCULAR AL ESCRIBIR (Magia en vivo) ---
+    // --- 3. RECALCULAR AL ESCRIBIR ---
     function recalcularTotal() {
         const valRecargos = parseFloat(document.getElementById('input-recargos').value) || 0;
         const valMulta = parseFloat(document.getElementById('input-multa').value) || 0;
@@ -408,7 +417,6 @@
         e.preventDefault();
         if(!empenoSeleccionadoId) return;
         
-        // Leemos el total final calculado
         const totalPagar = parseFloat(document.getElementById('resumen-total').innerText.replace('$',''));
         const recargos = parseFloat(document.getElementById('input-recargos').value) || 0;
         const multa = parseFloat(document.getElementById('input-multa').value) || 0;
@@ -416,7 +424,7 @@
         if(!confirm(`¿Confirmas el desempeño por un total de $${totalPagar.toFixed(2)}?`)) return;
 
         try {
-            // NOTA: Se recomienda enviar los montos finales al backend para que el registro sea preciso.
+            // Enviamos los montos finales al backend
             const res = await fetch(`/empenos/${empenoSeleccionadoId}/desempeno`, {
                 method: 'POST',
                 headers: { 
@@ -445,7 +453,6 @@
     });
 
 </script>
-
   <style>
       .btn-select {
           background-color: #2a5a8a; color: white; border: none;
