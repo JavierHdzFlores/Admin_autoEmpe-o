@@ -188,7 +188,7 @@
       </table>
   </section>
   <div class="overlay" id="overlay"></div>
-  <script>
+ <script>
     // Lógica para CERRAR SESIÓN (Se mantiene igual)
     const btnLogout = document.querySelector('.logout-button');
 
@@ -213,9 +213,6 @@
      * @description Calcula los días enteros de diferencia entre dos fechas, 
      * evitando el error del "día extra" y asegurando que la comparación 
      * sea solo por fecha (medianoche).
-     * @param {string} fechaMenorStr - Fecha de vencimiento (YYYY-MM-DD).
-     * @param {Date} fechaMayor - La fecha actual (new Date()).
-     * @returns {number} Número de días transcurridos.
      */
     function calcularDiasDiferencia(fechaMenorStr, fechaMayor) {
         // 1. Crear fecha de vencimiento a medianoche
@@ -235,41 +232,33 @@
     /**
      * @description Determina el estado del empeño (Vigente, Vencido o Rematado) 
      * basado en la fecha de vencimiento y 5 días de gracia.
-     * @param {string} fechaVencimientoStr - Fecha de vencimiento (YYYY-MM-DD).
-     * @returns {object} {estado, diasRetraso, diasTotalesGracia}
      */
     function calcularEstadoYRetraso(fechaVencimientoStr) {
         const DIAS_GRACIA = 5;
         const hoy = new Date();
         
-        // Los días transcurridos desde el vencimiento.
-        // Ej: si vence el 10 y hoy es 10, diasDesdeVencimiento es 0.
-        // Ej: si vence el 10 y hoy es 11, diasDesdeVencimiento es 1.
         const diasDesdeVencimiento = calcularDiasDiferencia(fechaVencimientoStr, hoy);
         
         let estadoCalculado = '';
-        let diasRetraso = 0; // Días que causan recargo/multa
+        let diasRetraso = 0; 
 
         if (diasDesdeVencimiento <= 0) {
-            // Hoy es igual o anterior al vencimiento.
             estadoCalculado = 'Vigente';
             diasRetraso = 0;
         } else if (diasDesdeVencimiento <= DIAS_GRACIA) {
-            // Hoy está dentro del periodo de gracia (1 a 5 días después del vencimiento).
+            // Entre 1 y 5 días
             estadoCalculado = 'Vencido';
-            // Los días de retraso para el cálculo de recargo son los días transcurridos en gracia.
             diasRetraso = diasDesdeVencimiento; 
         } else {
-            // Hoy es después del periodo de gracia (6+ días después del vencimiento).
+            // 6 días o más
             estadoCalculado = 'Rematado';
-            // Los días de retraso son los días totales transcurridos para la multa/mensaje.
             diasRetraso = diasDesdeVencimiento; 
         }
 
         return {
             estado: estadoCalculado,
             diasRetraso: diasRetraso,
-            diasTotalesGracia: DIAS_GRACIA // Máximo de días de gracia, para información general
+            diasTotalesGracia: DIAS_GRACIA
         };
     }
 
@@ -303,14 +292,10 @@
           clientes.forEach(cliente => {
             if(cliente.empenos && cliente.empenos.length > 0) {
                 cliente.empenos.forEach(empeno => {
-                    // Generamos el estado basado en la lógica de fechas
                     const { estado } = calcularEstadoYRetraso(empeno.fecha_vencimiento);
                     
-                    // Solo mostramos empeños ACTIVOS (Vigente o Vencido)
-                    // NOTA: Si está 'Rematado' por fecha, ya no lo mostramos en Refrendo
                     if (estado === 'Vigente' || estado === 'Vencido') {
                         const nombreCompleto = `${cliente.nombre} ${cliente.apellidos}`;
-                        // Aseguramos que la clase CSS sea minúscula y sin 'ñ'
                         const estadoClass = estado.toLowerCase().replace(/ñ/g, 'n'); 
                         
                         const tr = document.createElement('tr');
@@ -347,7 +332,7 @@
         }
       } catch (error) {
         console.error(error);
-        alert("Error de conexión.");
+        alert("Error de conexión");
       }
     });
 
@@ -356,7 +341,7 @@
     let empenoSeleccionadoId = null;
     let interesBaseGlobal = 0; 
 
-    // --- FUNCIÓN DE SELECCIÓN (INTEGRA NUEVA LÓGICA DE ESTADOS) ---
+    // --- FUNCIÓN DE SELECCIÓN (MODIFICADA LA LÍNEA DEL MENSAJE) ---
     window.seleccionarEmpeno = function(id, fechaVencimientoStr, montoPrestamo, nombreCliente, nombreArticulo) {
         empenoSeleccionadoId = id;
 
@@ -371,15 +356,14 @@
         document.getElementById('info-interes').value = `$${interesBaseGlobal.toFixed(2)}`;
         document.getElementById('resumen-base').innerText = `$${interesBaseGlobal.toFixed(2)}`;
 
-        // 3. CALCULAR EL ESTADO Y RETRASO CON LA NUEVA LÓGICA
+        // 3. CALCULAR EL ESTADO Y RETRASO
         const { estado, diasRetraso, diasTotalesGracia } = calcularEstadoYRetraso(fechaVencimientoStr);
         
-        // 4. Aplicar Recargos y Multas basados en el estado y días de retraso
+        // 4. Aplicar Recargos y Multas
         const recargoPorDia = 10; // $10 de recargo por día de gracia
         const inputRecargos = document.getElementById('input-recargos');
         const inputMulta = document.getElementById('input-multa');
         
-        // Siempre inicializamos los inputs de recargo y multa a 0
         inputRecargos.value = "0.00"; 
         inputMulta.value = "0.00"; 
 
@@ -393,7 +377,8 @@
 
         } else if (estado === 'Vencido') {
             // Entró en días de gracia
-            document.getElementById('resumen-dias').innerText = `Vencido: ${diasRetraso} de ${diasTotalesGracia} días de gracia`;
+            // *** ESTA ES LA LÍNEA MODIFICADA: Muestra solo los días exactos de retraso ***
+            document.getElementById('resumen-dias').innerText = `${diasRetraso} días de gracia`;
             document.getElementById('resumen-dias').style.color = 'orange';
             
             // Recargo: $10 por cada día dentro del periodo de gracia
@@ -406,7 +391,6 @@
             document.getElementById('resumen-dias').style.color = 'red';
             
             // Multa/Recargo por pasar a remate:
-            // Ejemplo: Aplicar recargo fijo del 10% del préstamo como multa
             const multaFijaRemate = montoPrestamo * 0.10; 
             inputMulta.value = multaFijaRemate.toFixed(2);
             document.getElementById('resumen-mensaje').innerText = `El empeño ha pasado a Remate. Aplica una multa fija por remate.`;
@@ -435,27 +419,34 @@
     document.getElementById('input-recargos').addEventListener('input', recalcularTotal);
     document.getElementById('input-multa').addEventListener('input', recalcularTotal);
 
-    // 4. ACTUALIZAR EL BOTÓN DE PAGAR (Se mantiene igual)
+    // 4. ACTUALIZAR EL BOTÓN DE PAGAR (Sugerencia de Backend)
     const btnPagar = document.getElementById('btn-pagar');
     btnPagar.addEventListener('click', async (e) => {
         e.preventDefault();
         if (!empenoSeleccionadoId) return;
 
+        // Obtener valores finales calculados en el frontend
         const totalPagar = parseFloat(document.getElementById('resumen-total').innerText.replace('$',''));
-        
+        const recargos = parseFloat(document.getElementById('input-recargos').value) || 0;
+        const multa = parseFloat(document.getElementById('input-multa').value) || 0;
+
         if(!confirm(`¿Cobrar un total de $${totalPagar.toFixed(2)}?`)) return;
 
-        // Nota: Asegúrate de que tu backend (si es necesario) pueda manejar 
-        // y registrar los valores de recargo y multa calculados en el frontend.
-        // Si el backend recalcula el refrendo base, solo necesitas enviar el id.
         try {
+            // Enviamos Recargos y Multa al backend para que registre la transacción
             const response = await fetch(`/empenos/${empenoSeleccionadoId}/refrendo`, {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({}) 
+                body: JSON.stringify({
+                    total_pagado: totalPagar,
+                    monto_recargos: recargos,
+                    monto_multa: multa,
+                    abono_refrendo: parseFloat(document.getElementById('abono-refrendo').value) || 0,
+                    abono_capital: parseFloat(document.getElementById('abono-capital').value) || 0
+                }) 
             });
 
             if (response.ok) {
