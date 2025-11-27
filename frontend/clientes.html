@@ -249,6 +249,9 @@
     }
 
     let todosLosEmpenos = [];
+    let displayedData = []; // subconjunto actual que se muestra (puede ser filtrado/buscado)
+    let currentPage = 1;
+    const pageSize = 10; // filas por página
 
     // --- 1. CARGAR DATOS ---
     async function cargarTabla() {
@@ -262,9 +265,11 @@
 
         if (response.ok) {
           todosLosEmpenos = await response.json();
-          
-          // A. Dibujamos la tabla
-          renderizarTabla(todosLosEmpenos);
+          // inicializamos la vista mostrada con todos los empeños
+          displayedData = todosLosEmpenos;
+          currentPage = 1;
+          // A. Dibujamos la tabla (paginada)
+          renderizarTabla(displayedData);
           
           // B. Calculamos los contadores de arriba (¡NUEVO!)
           calcularEstadisticas(todosLosEmpenos);
@@ -302,68 +307,77 @@
 
     // --- 3. RENDERIZAR TABLA (Ya lo tenías) ---
 // --- 2. DIBUJAR TABLA (Con Nombres Reales) ---
-  function renderizarTabla(listaDatos) {
-    const tbody = document.getElementById('tabla-clientes-body');
-    tbody.innerHTML = '';
+    function renderizarTabla(listaDatos) {
+      const tbody = document.getElementById('tabla-clientes-body');
+      tbody.innerHTML = '';
 
-    if (listaDatos.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">No hay registros.</td></tr>';
-      return;
+      // Guardamos la lista visible para la paginación
+      displayedData = listaDatos || [];
+      const totalItems = displayedData.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+      // Ajustamos currentPage dentro de límites
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      if (totalItems === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">No hay registros.</td></tr>';
+        // Actualizar controles de paginación
+        document.getElementById('page-info').innerText = `Página 0 de 0`;
+        document.getElementById('btn-prev').disabled = true;
+        document.getElementById('btn-next').disabled = true;
+        return;
+      }
+
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      const pageItems = displayedData.slice(start, end);
+
+      pageItems.forEach(item => {
+        const tr = document.createElement('tr');
+
+        // Resolver Nombre
+        let nombreMostrado = `Cliente #${item.cliente_id}`;
+        if (item.cliente && item.cliente.nombre) {
+            nombreMostrado = `${item.cliente.nombre} ${item.cliente.apellidos}`;
+        }
+
+        // Formatos
+        const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.monto_prestamo);
+        const estadoClass = item.estado ? item.estado.toLowerCase() : '';
+
+        // --- BOTONES DE ACCIÓN ---
+        let botones = '';
+        botones += `
+          <button class="btn-icon btn-edit" onclick="abrirEdicion(${item.id})" title="Ver/Editar Detalles">Editar</button>
+          <button class="btn-select btn-primary" onclick="abrirEdicion(${item.id})" title="Seleccionar">Seleccionar</button>
+        `;
+
+        if (item.estado === 'Vencido') {
+            botones += `
+              <button class="btn-icon btn-delete" onclick="enviarARemate(${item.id}, '${item.marca_modelo}')" title="Enviar a Remate">📢</button>`;
+        } else if (item.estado === 'Rematado') {
+            botones += '<span style="font-size:0.8em; color:orange;"></span>';
+        }
+
+        tr.innerHTML = `
+          <td style="font-weight: bold; color: #113b64;">${nombreMostrado}</td>
+          <td>${item.id}</td>
+          <td>${item.marca_modelo}</td>
+          <td>${montoFmt}</td>
+          <td>${item.fecha_empeno}</td>
+          <td>${item.fecha_vencimiento}</td>
+          <td><span class=\"status status-${estadoClass}\">${item.estado}</span></td>
+          <td style=\"text-align:center;\"><div style=\"display:flex; justify-content:center; gap:10px;\">${botones}</div></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Actualizar controles de paginación
+      document.getElementById('page-info').innerText = `Página ${currentPage} de ${totalPages}`;
+      document.getElementById('btn-prev').disabled = currentPage <= 1;
+      document.getElementById('btn-next').disabled = currentPage >= totalPages;
     }
-
-    listaDatos.forEach(item => {
-      const tr = document.createElement('tr');
-      
-      // Resolver Nombre
-      let nombreMostrado = `Cliente #${item.cliente_id}`;
-      if (item.cliente && item.cliente.nombre) {
-          nombreMostrado = `${item.cliente.nombre} ${item.cliente.apellidos}`;
-      }
-
-      // Formatos
-      const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.monto_prestamo);
-      const estadoClass = item.estado.toLowerCase();
-
-      // --- BOTONES DE ACCIÓN ---
-      let botones = '';
-      
-      // 1. Botón Editar (Siempre visible) - Usamos el ID para buscar los datos luego
-      botones += `
-        <button class="btn-icon btn-edit" onclick="abrirEdicion(${item.id})" title="Ver/Editar Detalles">
-            Editar
-        </button>
-        <button class="btn-select btn-primary" onclick="abrirEdicion(${item.id})" title="Seleccionar">
-            Seleccionar
-        </button>
-      `;
-
-      // 2. Botón Rematar (Solo si está vencido)
-      if (item.estado === 'Vencido') {
-          botones += `
-            <button class="btn-icon btn-delete" onclick="enviarARemate(${item.id}, '${item.marca_modelo}')" title="Enviar a Remate">
-               📢
-            </button>`;
-      } else if (item.estado === 'Rematado') {
-          botones += '<span style="font-size:0.8em; color:orange;"></span>';
-      }
-
-      tr.innerHTML = `
-        <td style="font-weight: bold; color: #113b64;">${nombreMostrado}</td> 
-        <td>${item.id}</td>
-        <td>${item.marca_modelo}</td>
-        <td>${montoFmt}</td>
-        <td>${item.fecha_empeno}</td>
-        <td>${item.fecha_vencimiento}</td>
-        <td><span class=\"status status-${estadoClass}\">${item.estado}</span></td>
-        <td style=\"text-align:center;\">
-            <div style=\"display:flex; justify-content:center; gap:10px;\">
-                ${botones}
-            </div>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
 
     // --- 4. FILTROS (Ya lo tenías, se mantiene igual) ---
     function filtrarDatos() {
@@ -442,9 +456,11 @@
             }
           });
 
-          // Actualizamos la memoria y renderizamos
+          // Actualizamos la memoria y renderizamos (reiniciamos paginación)
           todosLosEmpenos = empenosEncontrados;
-          renderizarTabla(todosLosEmpenos);
+          displayedData = empenosEncontrados;
+          currentPage = 1;
+          renderizarTabla(displayedData);
           calcularEstadisticas(todosLosEmpenos);
 
           if (todosLosEmpenos.length === 0) {
@@ -460,6 +476,17 @@
         alert('Error de conexión al buscar clientes');
       }
     });
+
+    // --- PAGINACIÓN: cambiar página ---
+    window.cambiarPagina = function(delta) {
+      // delta: -1 o +1
+      currentPage = (currentPage || 1) + delta;
+      // recalcular límites y renderizar
+      const totalPages = Math.max(1, Math.ceil((displayedData.length || 0) / pageSize));
+      if (currentPage < 1) currentPage = 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+      renderizarTabla(displayedData);
+    }
 
     // Inicializar
     document.addEventListener('DOMContentLoaded', cargarTabla);
