@@ -136,7 +136,7 @@
             // ... dentro de cargarDashboard ...
 
             // 2. Cargar Tabla de Acciones Rápidas esta ya funciona no le muevas nada
-            const resTabla = await fetch('/dashboard/tabla', {
+            const resTabla = await fetch('/movimientos/recientes', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -168,20 +168,21 @@
 
                     // LÓGICA DE COLORES SEGÚN ACCIÓN (más flexible)
                     let badgeClass = 'status-vigente'; // Por defecto
-                    let signo = '+'; // Dinero entra
 
                     if (accionNorm.includes('nuevo')) {
                       badgeClass = 'status-nuevo';
-                      signo = '-';
                     } else if (accionNorm.includes('desempe') || accionNorm.includes('venta')) {
                       badgeClass = 'status-desempeno';
                     } else if (accionNorm.includes('refrendo')) {
                       badgeClass = 'status-refrendo';
+                    } else if (accionNorm.includes('reevalu') || accionNorm.includes('reeval')) {
+                      badgeClass = 'status-reevaluo';
                     }
 
                     // Formato de moneda (asegurarnos número)
                     const montoVal = Number(fila.monto) || 0;
-                    const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(montoVal);
+                    const signo = montoVal < 0 ? '-' : '+';
+                    const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(Math.abs(montoVal));
 
                     // Construir celdas de forma segura
                     const tdCliente = document.createElement('td');
