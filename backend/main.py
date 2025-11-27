@@ -200,6 +200,35 @@ def rematar_empeno(id: int, db: Session = Depends(get_db), token: str = Depends(
         raise HTTPException(status_code=404, detail="Empeño no encontrado")
     return {"mensaje": "Artículo enviado a remate", "estado": resultado.estado}
 
+
+# Endpoint temporal para depuración: listar movimientos de caja recientes
+@app.get("/movimientos/recientes")
+def obtener_movimientos_recientes(limit: int = 20, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    """Devuelve los últimos movimientos de caja con información del empeño y cliente (si existe).
+    Útil para depurar por qué el dashboard no muestra Refrendos/Desempeños/Ventas.
+    """
+    movimientos = db.query(models.MovimientoCaja).order_by(models.MovimientoCaja.fecha_movimiento.desc()).limit(limit).all()
+    resultado = []
+    for m in movimientos:
+        empeno = db.query(models.Empeno).filter(models.Empeno.id == m.empeno_id).first()
+        cliente_nombre = 'Desconocido'
+        articulo = 'N/A'
+        if empeno and empeno.cliente:
+            cliente_nombre = f"{empeno.cliente.nombre} {empeno.cliente.apellidos}"
+            articulo = empeno.marca_modelo or articulo
+
+        resultado.append({
+            'tipo': m.tipo_movimiento.value if hasattr(m.tipo_movimiento, 'value') else str(m.tipo_movimiento),
+            'accion': m.tipo_movimiento.value if hasattr(m.tipo_movimiento, 'value') else str(m.tipo_movimiento),
+            'cliente': cliente_nombre,
+            'articulo': articulo,
+            'monto': float(m.monto),
+            'fecha_obj': m.fecha_movimiento.date(),
+            'fecha': str(m.fecha_movimiento.date())
+        })
+
+    return resultado
+
 # --- RUTA PARA EDITAR CLIENTE Y EMPEÑO ---
 @app.put("/empenos/{id}/editar")
 def editar_empeno(
