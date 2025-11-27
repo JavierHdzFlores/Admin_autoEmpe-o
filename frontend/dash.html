@@ -147,7 +147,7 @@
                 
                 // --- A. CÁLCULOS ---
                 // 1. Total de Empeños
-                document.getElementById('stat-total').innerText = datos.length
+                document.getElementById('stat-total').innerText = todos.length
 
                 // Filtramos los activos
                 const activos = todos.filter(e => e.estado === 'Vigente' || e.estado === 'Vencido');
@@ -211,9 +211,6 @@
                     });
                 }
             }
-
-            
-            
 
         } catch (error) {
             console.error('Error cargando dashboard:', error);
