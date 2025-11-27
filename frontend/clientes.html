@@ -343,8 +343,7 @@
 
         // Formatos
         const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.monto_prestamo);
-        const estadoClass = item.estado ? item.estado.toLowerCase() : '';
-
+        const estadoClass = item.estado ? item.estado.toLowerCase().replace(/ñ/g, 'n') : '';
         // Celdas
         const tdNombre = document.createElement('td'); tdNombre.style.fontWeight = 'bold'; tdNombre.style.color = '#113b64'; tdNombre.textContent = nombreMostrado;
         const tdFolio = document.createElement('td'); tdFolio.textContent = item.id;
@@ -683,4 +682,4 @@
   });
   </script>
 </body>
-</html>º
+</html>
