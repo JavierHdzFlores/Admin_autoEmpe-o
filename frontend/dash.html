@@ -184,7 +184,7 @@
             // 1. Cargar estadísticas del dashboard
             // Pedimos TODOS los empeños existentes
             // (Usamos el endpoint básico que ya existe, no el de KPIs)
-            const resTodos = await fetch('/empenos', {
+            const resTodos = await fetch('/empenos/todos', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
