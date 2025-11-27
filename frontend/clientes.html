@@ -307,7 +307,8 @@
 // --- 2. DIBUJAR TABLA (Con Nombres Reales) ---
     function renderizarTabla(listaDatos) {
       const tbody = document.getElementById('tabla-clientes-body');
-      tbody.innerHTML = '';
+      // Limpiar de forma explícita para evitar que queden nodos o listeners antiguos
+      while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
 
       // Guardamos la lista visible para la paginación
       displayedData = listaDatos || [];
@@ -344,29 +345,54 @@
         const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.monto_prestamo);
         const estadoClass = item.estado ? item.estado.toLowerCase() : '';
 
-        // --- BOTONES DE ACCIÓN ---
-        let botones = '';
-        botones += `
-          <button class="btn-select btn-primary" onclick="abrirEdicion(${item.id})" title="Seleccionar">Seleccionar</button>
-        `;
+        // Celdas
+        const tdNombre = document.createElement('td'); tdNombre.style.fontWeight = 'bold'; tdNombre.style.color = '#113b64'; tdNombre.textContent = nombreMostrado;
+        const tdFolio = document.createElement('td'); tdFolio.textContent = item.id;
+        const tdArticulo = document.createElement('td'); tdArticulo.textContent = item.marca_modelo || '-';
+        const tdMonto = document.createElement('td'); tdMonto.textContent = montoFmt;
+        const tdFechaEmp = document.createElement('td'); tdFechaEmp.textContent = item.fecha_empeno || '';
+        const tdVence = document.createElement('td'); tdVence.textContent = item.fecha_vencimiento || '';
+        const tdEstado = document.createElement('td');
+        const spanEstado = document.createElement('span'); spanEstado.className = `status status-${estadoClass}`; spanEstado.textContent = item.estado || '';
+        tdEstado.appendChild(spanEstado);
 
+        // Acciones (botones)
+        const tdAcciones = document.createElement('td'); tdAcciones.style.textAlign = 'center';
+        const accionesCont = document.createElement('div'); accionesCont.style.display = 'flex'; accionesCont.style.justifyContent = 'center'; accionesCont.style.gap = '10px';
+
+        // Botón Seleccionar
+        const btnSelect = document.createElement('button');
+        btnSelect.className = 'btn-select btn-primary';
+        btnSelect.title = 'Seleccionar';
+        btnSelect.textContent = 'Seleccionar';
+        btnSelect.addEventListener('click', () => abrirEdicion(item.id));
+        accionesCont.appendChild(btnSelect);
+
+        // Botón Enviar a Remate (si aplica)
         if (item.estado === 'Vencido') {
-          botones += `
-            <button class="btn-icon btn-delete" onclick="enviarARemate(${item.id}, '${item.marca_modelo}')" title="Enviar a Remate"></button>`;
+            const btnRemate = document.createElement('button');
+            btnRemate.className = 'btn-icon btn-delete';
+            btnRemate.title = 'Enviar a Remate';
+            // Usar closure para pasar valores seguros
+            btnRemate.addEventListener('click', () => enviarARemate(item.id, item.marca_modelo));
+            accionesCont.appendChild(btnRemate);
         } else if (item.estado === 'Rematado') {
-          botones += '<span style="font-size:0.8em; color:orange;"></span>';
+            const aviso = document.createElement('span'); aviso.style.fontSize = '0.8em'; aviso.style.color = 'orange'; aviso.textContent = '';
+            accionesCont.appendChild(aviso);
         }
 
-        tr.innerHTML = `
-          <td style="font-weight: bold; color: #113b64;">${nombreMostrado}</td>
-          <td>${item.id}</td>
-          <td>${item.marca_modelo}</td>
-          <td>${montoFmt}</td>
-          <td>${item.fecha_empeno}</td>
-          <td>${item.fecha_vencimiento}</td>
-          <td><span class=\"status status-${estadoClass}\">${item.estado}</span></td>
-          <td style=\"text-align:center;\"><div style=\"display:flex; justify-content:center; gap:10px;\">${botones}</div></td>
-        `;
+        tdAcciones.appendChild(accionesCont);
+
+        // Añadir celdas a la fila
+        tr.appendChild(tdNombre);
+        tr.appendChild(tdFolio);
+        tr.appendChild(tdArticulo);
+        tr.appendChild(tdMonto);
+        tr.appendChild(tdFechaEmp);
+        tr.appendChild(tdVence);
+        tr.appendChild(tdEstado);
+        tr.appendChild(tdAcciones);
+
         tbody.appendChild(tr);
       });
 
@@ -657,4 +683,4 @@
   });
   </script>
 </body>
-</html>
+</html>º
