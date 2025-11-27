@@ -280,3 +280,72 @@ def editar_empeno_completo(db: Session, empeno_id: int, datos: schemas.EdicionCo
     db.commit()
     db.refresh(empeno)
     return empeno
+
+# --- DASHBOARD: ACTIVIDAD RECIENTE (MEZCLA TODO) ---
+def get_actividad_reciente(db: Session, limite: int = 10):
+    """
+    Obtiene una lista mezclada de Nuevos Empeños y Movimientos (Refrendos, Desempeños, etc.)
+    ordenados cronológicamente para el Dashboard.
+    """
+    
+    # 1. Obtener los últimos Empeños creados (Acción: "Nuevo Empeño")
+    ultimos_empenos = db.query(models.Empeno)\
+        .order_by(models.Empeno.fecha_empeno.desc())\
+        .limit(limite).all()
+
+    # 2. Obtener los últimos Movimientos de Caja (Refrendos, Desempeños, Ventas, Reevalúos)
+    ultimos_movimientos = db.query(models.MovimientoCaja)\
+        .order_by(models.MovimientoCaja.fecha.desc())\
+        .limit(limite).all()
+
+    # 3. Formatear y Mezclar
+    lista_final = []
+
+    # Procesamos Empeños (Nuevos)
+    for e in ultimos_empenos:
+        # Obtenemos nombre cliente
+        nombre_c = "Desconocido"
+        if e.cliente:
+            nombre_c = f"{e.cliente.nombre} {e.cliente.apellidos}"
+            
+        lista_final.append({
+            "tipo": "nuevo", # Para usarlo en el color del CSS
+            "accion": "Nuevo Empeño",
+            "cliente": nombre_c,
+            "articulo": e.marca_modelo,
+            "monto": float(e.monto_prestamo),
+            "fecha_obj": e.fecha_empeno, # Objeto fecha para ordenar
+            "fecha": str(e.fecha_empeno) # String para mostrar
+        })
+
+    # Procesamos Movimientos (Refrendos, Desempeños, etc.)
+    for m in ultimos_movimientos:
+        # Necesitamos datos del empeño y cliente asociados
+        empeno = db.query(models.Empeno).filter(models.Empeno.id == m.empeno_id).first()
+        nombre_c = "Desconocido"
+        articulo = "N/A"
+        
+        if empeno:
+            articulo = empeno.marca_modelo
+            if empeno.cliente:
+                nombre_c = f"{empeno.cliente.nombre} {empeno.cliente.apellidos}"
+
+        # Definimos etiqueta bonita según el tipo
+        nombre_accion = m.tipo_movimiento.value # Ej: "Refrendo", "Desempeño"
+        
+        lista_final.append({
+            "tipo": "movimiento",
+            "accion": nombre_accion, # Aquí saldrá "Refrendo", "Desempeño", etc.
+            "cliente": nombre_c,
+            "articulo": articulo,
+            "monto": float(m.monto),
+            "fecha_obj": m.fecha.date(), # Convertimos datetime a date para comparar
+            "fecha": str(m.fecha.date())
+        })
+
+    # 4. Ordenar la lista mezclada por fecha (del más reciente al más viejo)
+    # Usamos una función lambda para ordenar por 'fecha_obj'
+    lista_final.sort(key=lambda x: x['fecha_obj'], reverse=True)
+
+    # 5. Devolver solo la cantidad solicitada (ej: los top 10)
+    return lista_final[:limite]

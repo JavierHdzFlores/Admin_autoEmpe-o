@@ -98,10 +98,11 @@ def obtener_resumen(db: Session = Depends(get_db), token: str = Depends(oauth2_s
 
 # 4. Dashboard Tabla
 @app.get("/dashboard/tabla")
-def obtener_tabla_reciente(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
-    return crud.get_empenos_recientes_tabla(db)
+def obtener_tabla_dashboard(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    # Llamamos a la nueva función que mezcla todo
+    datos = crud.get_actividad_reciente(db, limite=7)
+    return datos
 
-# En backend/main.py
 # --- RUTA DE BÚSQUEDA DE CLIENTES ---
 @app.get("/clientes/buscar", response_model=List[schemas.Cliente])
 def buscar_clientes(q: str, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):

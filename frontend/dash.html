@@ -135,19 +135,7 @@
 
         try {
             // 1. Cargar contadores (Tarjetas)
-            const resStats = await fetch('/dashboard/resumen', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            
-            if (resStats.ok) {
-                const data = await resStats.json();
-                document.getElementById('stat-total').innerText = data.total_empenos;
-                document.getElementById('stat-activos').innerText = data.activos;
-                document.getElementById('stat-clientes').innerText = data.clientes;
-                document.getElementById('stat-remate').innerText = data.remate;
-            }
-
-            // 2. Cargar Tabla de Acciones Rápidas (NUEVO)
+            // 2. Cargar Tabla de Acciones Rápidas
             const resTabla = await fetch('/dashboard/tabla', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -155,25 +143,41 @@
             if (resTabla.ok) {
                 const filas = await resTabla.json();
                 const tbody = document.getElementById('tabla-acciones-body');
-                tbody.innerHTML = ''; // Limpiar tabla
+                tbody.innerHTML = ''; 
 
                 if (filas.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sin movimientos recientes</td></tr>';
                 } else {
                     filas.forEach(fila => {
                         const tr = document.createElement('tr');
+                        
+                        // LÓGICA DE COLORES SEGÚN ACCIÓN
+                        let badgeClass = 'status-vigente'; // Por defecto
+                        let signo = '+'; // Dinero entra
+                        
+                        if (fila.accion === 'Nuevo Empeño') {
+                            badgeClass = 'status-nuevo'; // Azul
+                            signo = '-'; // Dinero sale (prestamos)
+                        } else if (fila.accion === 'Desempeño' || fila.accion === 'Venta Remate') {
+                            badgeClass = 'status-desempeno'; // Verde (Liquidación)
+                        } else if (fila.accion === 'Refrendo') {
+                            badgeClass = 'status-refrendo'; // Naranja
+                        }
+
+                        // Formato de moneda
+                        const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(fila.monto);
+
                         tr.innerHTML = `
-                            <td>${fila.cliente}</td>
-                            <td><span class="status status-vigente">${fila.accion}</span></td>
+                            <td><span style="font-weight:bold; color:#555;">${fila.cliente}</span></td>
+                            <td><span class="status ${badgeClass}">${fila.accion}</span></td>
                             <td>${fila.articulo}</td>
-                            <td>$${fila.monto}</td>
+                            <td style="font-weight:bold;">${signo} ${montoFmt}</td>
                             <td>${fila.fecha}</td>
                         `;
                         tbody.appendChild(tr);
                     });
                 }
             }
-
         } catch (error) {
             console.error('Error cargando dashboard:', error);
         }

@@ -305,3 +305,29 @@ table tbody tr:nth-child(even) {
     display: block;
   }
 }
+
+/* Colores para las Acciones Rápidas */
+.status-nuevo {
+    background-color: #113b64; /* Azul oscuro */
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+}
+
+.status-refrendo {
+    background-color: #ffc107; /* Amarillo/Naranja */
+    color: #333;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.status-desempeno {
+    background-color: #28a745; /* Verde éxito */
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+}
