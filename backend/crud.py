@@ -94,13 +94,17 @@ def get_empenos_recientes_tabla(db: Session, limite: int = 5):
 # ==========================================
 def procesar_nuevo_empeno(db: Session, datos: schemas.NuevoEmpenoRequest):
     # 1. Verificamos si el cliente existe por INE
-    cliente_ine = datos.cliente.ine.strip()
-    cliente_existente = get_cliente_by_ine(db, ine=cliente_ine)
-    
+    # Defensive: datos.cliente.ine puede ser None. Solo buscamos por INE si llega un valor no vacío.
+    cliente_ine = (datos.cliente.ine or '').strip()
+    cliente_existente = None
+    if cliente_ine:
+        cliente_existente = get_cliente_by_ine(db, ine=cliente_ine)
+
     if cliente_existente:
-        print(f"Cliente encontrado: {cliente_existente.nombre}")
+        print(f"Cliente encontrado por INE: {cliente_existente.nombre}")
         cliente_id = cliente_existente.id
     else:
+        # No había INE o no se encontró: creamos un cliente nuevo
         print("Creando cliente nuevo...")
         nuevo_cliente = create_cliente(db, datos.cliente)
         cliente_id = nuevo_cliente.id
