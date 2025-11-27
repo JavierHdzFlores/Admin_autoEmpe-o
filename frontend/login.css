@@ -173,26 +173,6 @@ body {
   margin-top: 20px;
 }
 
-.create-user-btn {
-  width: 100%;
-  padding: 14px;
-  background-color: #f5b301;
-  color: #113b64;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 18px;
-  font-weight: bold;
-  font-family: Georgia, 'Times New Roman', Times, serif;
-  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-  margin-top: 10px;
-}
-
-.create-user-btn:hover {
-  background-color: #113b64;
-  color: white;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
 
 
 /* =======================================================
