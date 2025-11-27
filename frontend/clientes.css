@@ -693,6 +693,24 @@ table tbody tr:nth-child(even) {
     font-size: 18px;
     padding: 12px 20px;
   }
+
+  /* Botón de búsqueda (¡AMARILLO POR DEFECTO!) */
+.search-form .btn-primary {
+  background-color: var(--color-amarillo);
+  color: var(--color-azul-oscuro);
+  width: 130px; /* Ancho fijo */
+  padding: 12px 15px;
+  font-size: 16px;
+}
+
+.search-form .btn-primary .icon {
+  margin-right: 5px;
+}
+
+.search-form .btn-primary:hover {
+  background-color: var(--color-azul-oscuro); /* Invertimos al pasar */
+  color: white;
+}
   
   #refrendo-details > h3 .folio {
       font-size: 0.8em;
