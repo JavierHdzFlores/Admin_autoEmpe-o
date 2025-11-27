@@ -75,8 +75,8 @@
               <th>Folio</th>
               <th>Cliente</th>
               <th>Artículo</th>
-              <th>Precio en venta (Sugerido)</th> 
-              <th>Precio adquirido</th>
+              <th>Precio adquirido</th> 
+              <th>Precio en venta (sugerido)</th>
               <th>Fecha Ingreso</th>
               <th>Estado</th>
               <th>Acción</th> </tr>
@@ -162,7 +162,7 @@
         const folio = item.id;
         const clienteNombre = item.cliente ? `${item.cliente.nombre || ''} ${item.cliente.apellidos || ''}`.trim() : (item.cliente_id ? `Cliente #${item.cliente_id}` : '-');
         const articulo = item.marca_modelo || '-';
-        const precioSugerido = (item.monto_prestamo ? item.monto_prestamo * 1.5 : 0); // Sugerido: 150% del préstamo
+        const precioSugerido = (item.monto_prestamo ? item.monto_prestamo * 1.6 : 0); // Sugerido: 160% del préstamo
         const precioAdquirido = item.precio_venta || item.precio_adquirido || '-';
         // Fecha de ingreso: preferimos campo explícito, si no usamos fecha_empeno
         const fechaIngreso = item.fecha_ingreso || item.fecha_empeno || item.fecha_vencimiento || '-';
@@ -212,29 +212,34 @@
 
     // 4. FUNCIÓN VENDER
     window.venderArticulo = async function(id, nombre, precioSugerido) {
-        const precioReal = prompt(`Vender "${nombre}".\nPrecio Sugerido: $${precioSugerido}\n\nIngresa el precio final de venta:`, precioSugerido);
-        
-        if (precioReal === null) return; // Cancelado
-        
-        try {
-            const res = await fetch(`/empenos/${id}/venta`, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify({ precio_venta: parseFloat(precioReal) })
-            });
+      const precioRealStr = prompt(`Vender "${nombre}".\nPrecio Sugerido: $${precioSugerido}\n\nIngresa el precio final de venta:`, precioSugerido);
+      if (precioRealStr === null) return; // Cancelado
 
-            if (res.ok) {
-                alert("✅ ¡Artículo vendido y dinero ingresado a caja!");
-                window.location.reload();
-            } else {
-                alert("Error al registrar venta");
-            }
-        } catch (e) {
-            alert("Error de conexión");
+      const precioReal = parseFloat(precioRealStr);
+      if (isNaN(precioReal)) { alert('Precio inválido'); return; }
+
+      const confirmar = confirm(`¿Confirma vender "${nombre}" por $${precioReal.toFixed(2)}?`);
+      if (!confirmar) return;
+
+      try {
+        const res = await fetch(`/empenos/${id}/venta`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify({ precio_venta: precioReal })
+        });
+
+        if (res.ok) {
+          alert("✅ ¡Artículo vendido y dinero ingresado a caja!");
+          window.location.reload();
+        } else {
+          alert("Error al registrar venta");
         }
+      } catch (e) {
+        alert("Error de conexión");
+      }
     }
     // Utility: escapar texto para evitar inyección en innerHTML (muy básico)
     function escapeHtml(str) {
@@ -252,15 +257,16 @@
       .status-rematado { background-color: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
       .status-vendido { background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
       
-      .btn-vender {
-          background-color: #28a745;
-          color: white;
+        .btn-vender {
+          background-color: #f5b301; /* color primario (amarillo) */
+          color: #113b64; /* texto azul oscuro */
           border: none;
-          padding: 5px 10px;
+          padding: 6px 10px;
           border-radius: 4px;
           cursor: pointer;
-      }
-      .btn-vender:hover { background-color: #218838; }
+          font-weight: 600;
+        }
+        .btn-vender:hover { background-color: #113b64; color: #ffffff; }
   </style>
 </body>
 </html>
