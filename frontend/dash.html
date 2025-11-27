@@ -180,30 +180,6 @@
                     });
                 }
             }
-
-            // 2. Cargar Tabla de Acciones Rápidas (NUEVO)
-            if (resTabla.ok) {
-                const filas = await resTabla.json();
-                const tbody = document.getElementById('tabla-acciones-body');
-                tbody.innerHTML = ''; // Limpiar tabla
-
-                if (filas.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sin movimientos recientes</td></tr>';
-                } else {
-                    filas.forEach(fila => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${fila.cliente}</td>
-                            <td><span class="status status-vigente">${fila.accion}</span></td>
-                            <td>${fila.articulo}</td>
-                            <td>$${fila.monto}</td>
-                            <td>${fila.fecha}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-            }
-
         } catch (error) {
             console.error('Error cargando dashboard:', error);
         }
