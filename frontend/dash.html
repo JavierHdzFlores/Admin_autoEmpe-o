@@ -166,6 +166,9 @@
             // ===================================================
             // PARTE 2: LA TABLA DE ACTIVIDAD RECIENTE 📉
             // ===================================================
+
+
+            // 2. Cargar Tabla de Acciones Rápidas
             const resTabla = await fetch('/dashboard/tabla', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -181,29 +184,36 @@
                     filas.forEach(fila => {
                         const tr = document.createElement('tr');
                         
-                        let badgeClass = 'status-vigente'; 
-                        let signo = '+'; 
+                        // LÓGICA DE COLORES SEGÚN ACCIÓN
+                        let badgeClass = 'status-vigente'; // Por defecto
+                        let signo = '+'; // Dinero entra
                         
                         if (fila.accion === 'Nuevo Empeño') {
-                            badgeClass = 'status-nuevo'; 
-                            signo = '-'; 
+                            badgeClass = 'status-nuevo'; // Azul
+                            signo = '-'; // Dinero sale (prestamos)
                         } else if (fila.accion === 'Desempeño' || fila.accion === 'Venta Remate') {
-                            badgeClass = 'status-desempeno'; 
+                            badgeClass = 'status-desempeno'; // Verde (Liquidación)
                         } else if (fila.accion === 'Refrendo') {
-                            badgeClass = 'status-refrendo'; 
+                            badgeClass = 'status-refrendo'; // Naranja
                         }
+
+                        // Formato de moneda
+                        const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(fila.monto);
 
                         tr.innerHTML = `
                             <td><span style="font-weight:bold; color:#555;">${fila.cliente}</span></td>
                             <td><span class="status ${badgeClass}">${fila.accion}</span></td>
                             <td>${fila.articulo}</td>
-                            <td style="font-weight:bold;">${signo} ${formatoMoneda.format(fila.monto)}</td>
+                            <td style="font-weight:bold;">${signo} ${montoFmt}</td>
                             <td>${fila.fecha}</td>
                         `;
                         tbody.appendChild(tr);
                     });
                 }
             }
+
+            
+            
 
         } catch (error) {
             console.error('Error cargando dashboard:', error);
