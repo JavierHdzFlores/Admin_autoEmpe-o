@@ -140,6 +140,12 @@
                 </tbody>
             </table>
         </div>
+        <div class="pagination-container">
+            <button class="btn-page" onclick="cambiarPagina(-1)" id="btn-prev">Anterior</button>
+            <span id="page-info">Página 1</span>
+            <button class="btn-page" onclick="cambiarPagina(1)" id="btn-next">Siguiente</button>
+        </div>
+
       </div>
       <!-- Aqui podemos agregar un apartado para que muestre la información del cliente -->
       <div id="seccion-editar-cliente" class="edit-card" style="display: none;">
@@ -323,7 +329,7 @@
       // 1. Botón Editar (Siempre visible) - Usamos el ID para buscar los datos luego
       botones += `
         <button class="btn-icon btn-edit" onclick="abrirEdicion(${item.id})" title="Ver/Editar Detalles">
-            Editar ✏️
+            Editar 
         </button>
       `;
 
@@ -356,19 +362,86 @@
   }
 
     // --- 4. FILTROS (Ya lo tenías, se mantiene igual) ---
+    // --- VARIABLES GLOBALES ---
+    todosLosEmpenos = []; // Toda la base de datos
+    let datosFiltrados = [];  // Lo que estamos viendo actualmente (por filtro)
+    
+    // Configuración de Paginación
+    let paginaActual = 1;
+    const filasPorPagina = 10; // <--- AQUÍ CAMBIAS EL LÍMITE
+
+    // --- 1. CARGAR DATOS (Modificado) ---
+    async function cargarTabla() {
+      try {
+        const response = await fetch('/empenos', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          todosLosEmpenos = await response.json();
+          // Al inicio, los datos filtrados son IGUALES a todos los datos
+          datosFiltrados = [...todosLosEmpenos]; 
+          
+          // Calculamos estadísticas y mostramos la PRIMERA página
+          calcularEstadisticas(todosLosEmpenos);
+          mostrarPagina(1); 
+        } else {
+          alert("Error al cargar clientes");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // --- NUEVA FUNCIÓN: MOSTRAR PÁGINA X ---
+    function mostrarPagina(numeroPagina) {
+        paginaActual = numeroPagina;
+
+        // 1. Calcular dónde cortar la lista
+        const inicio = (paginaActual - 1) * filasPorPagina;
+        const fin = inicio + filasPorPagina;
+        
+        // 2. Cortar la lista de datos filtrados
+        const datosPagina = datosFiltrados.slice(inicio, fin);
+        
+        // 3. Renderizar solo ese pedacito
+        renderizarTabla(datosPagina);
+
+        // 4. Actualizar botones (Deshabilitar si es fin o inicio)
+        document.getElementById('page-info').innerText = `Página ${paginaActual} de ${Math.ceil(datosFiltrados.length / filasPorPagina)}`;
+        
+        document.getElementById('btn-prev').disabled = (paginaActual === 1);
+        document.getElementById('btn-next').disabled = (fin >= datosFiltrados.length);
+    }
+
+    // --- FUNCIÓN BOTONES (Siguiente / Anterior) ---
+    window.cambiarPagina = function(delta) {
+        const totalPaginas = Math.ceil(datosFiltrados.length / filasPorPagina);
+        const nuevaPagina = paginaActual + delta;
+
+        if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
+            mostrarPagina(nuevaPagina);
+        }
+    };
+
+    // --- 3. FILTRADO (Actualizado para resetear a pág 1) ---
     function filtrarDatos() {
       const texto = document.getElementById('filtro-texto').value.toLowerCase();
       const estado = document.getElementById('filtro-estado').value;
       const fechaInicio = document.getElementById('filtro-fecha-inicio').value;
       const fechaFin = document.getElementById('filtro-fecha-fin').value;
 
-      const datosFiltrados = todosLosEmpenos.filter(item => {
-        const nombreC = item.cliente ? `${item.cliente.nombre} ${item.cliente.apellidos}` : '';
+      datosFiltrados = todosLosEmpenos.filter(item => {
+        // ... (Tu lógica de filtrado se queda IGUAL) ...
+        const matchMarca = item.marca_modelo.toLowerCase().includes(texto);
+        const matchId = item.id.toString().includes(texto);
         
-        const coincideTexto = 
-            item.marca_modelo.toLowerCase().includes(texto) ||
-            item.id.toString().includes(texto) ||
-            nombreC.toLowerCase().includes(texto);
+        let matchCliente = false;
+        if(item.cliente) {
+            const nombreC = `${item.cliente.nombre} ${item.cliente.apellidos}`.toLowerCase();
+            matchCliente = nombreC.includes(texto);
+        }
+        const coincideTexto = matchMarca || matchId || matchCliente;
 
         const coincideEstado = estado === "" || item.estado === estado;
 
@@ -383,11 +456,8 @@
         return coincideTexto && coincideEstado && coincideFecha;
       });
 
-      renderizarTabla(datosFiltrados);
-      
-      // Opcional: ¿Quieres que los números de arriba cambien al filtrar?
-      // Si sí, descomenta la siguiente línea:
-      // calcularEstadisticas(datosFiltrados); 
+      // IMPORTANTE: Al filtrar, regresamos siempre a la página 1
+      mostrarPagina(1);
     }
 
     // Listeners
