@@ -116,7 +116,8 @@
               <input type="date" id="filtro-fecha-fin">
           </div>
 
-          <button class="btn-secondary" onclick="limpiarFiltros()">Limpiar</button>
+            <button class="btn-secondary" onclick="limpiarFiltros()">Limpiar</button>
+            <button class="btn-primary" id="btn-buscar">Buscar</button>
       </div>     
 
       <div id="client-details" style="margin-top: 20px;">
@@ -397,10 +398,65 @@
     }
 
     // Listeners
-    document.getElementById('filtro-texto').addEventListener('input', filtrarDatos);
+    // Nota: la búsqueda por texto ahora se realiza con el botón "Buscar" (consulta al servidor),
+    // en lugar de filtrar en cada pulsación. Los filtros de estado/fecha siguen aplicando sobre
+    // los datos cargados en memoria (`todosLosEmpenos`).
     document.getElementById('filtro-estado').addEventListener('change', filtrarDatos);
     document.getElementById('filtro-fecha-inicio').addEventListener('change', filtrarDatos);
     document.getElementById('filtro-fecha-fin').addEventListener('change', filtrarDatos);
+
+    // --- BÚSQUEDA REMOTA (Botón) ---
+    const btnBuscar = document.getElementById('btn-buscar');
+    btnBuscar.addEventListener('click', async () => {
+      const query = document.getElementById('filtro-texto').value.trim();
+
+      // Si no escribe nada, recargamos la tabla completa
+      if (!query) {
+        cargarTabla();
+        return;
+      }
+
+      try {
+        const response = await fetch(`/clientes/buscar?q=${encodeURIComponent(query)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const clientes = await response.json();
+
+          // Aplanar los empeños encontrados para reutilizar renderizarTabla y calcularEstadisticas
+          const empenosEncontrados = [];
+          clientes.forEach(cliente => {
+            if (cliente.empenos && cliente.empenos.length > 0) {
+              cliente.empenos.forEach(empeno => {
+                // Adjuntamos referencia al cliente para poder mostrar nombre
+                empeno.cliente = {
+                  nombre: cliente.nombre || '',
+                  apellidos: cliente.apellidos || ''
+                };
+                empenosEncontrados.push(empeno);
+              });
+            }
+          });
+
+          // Actualizamos la memoria y renderizamos
+          todosLosEmpenos = empenosEncontrados;
+          renderizarTabla(todosLosEmpenos);
+          calcularEstadisticas(todosLosEmpenos);
+
+          if (todosLosEmpenos.length === 0) {
+            const tbody = document.getElementById('tabla-clientes-body');
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: #666;">No se encontraron resultados.</td></tr>';
+          }
+        } else {
+          console.error('Error buscando clientes');
+          alert('Error al buscar clientes (ver consola)');
+        }
+      } catch (error) {
+        console.error('Error de conexión al buscar clientes:', error);
+        alert('Error de conexión al buscar clientes');
+      }
+    });
 
     // Inicializar
     document.addEventListener('DOMContentLoaded', cargarTabla);
