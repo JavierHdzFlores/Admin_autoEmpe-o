@@ -133,40 +133,7 @@
 
     async function cargarDashboard() {
         try {
-            // ===================================================
-            // PARTE 1: LAS CARDS (Matemática en el Frontend) 🧮
-            // ===================================================
-            // Pedimos TODOS los empeños existentes
-            // (Usamos el endpoint básico que ya existe, no el de KPIs)
-            const resTodos = await fetch('/empenos', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (resTodos.ok) {
-                const todos = await resTodos.json();
-                
-                // --- A. CÁLCULOS ---
-                // 1. Total de Empeños
-                document.getElementById('stat-total').innerText = todos.length
-
-                // Filtramos los activos
-                const activos = todos.filter(e => e.estado === 'Vigente' || e.estado === 'Vencido');
-                const cantidadActivos = activos.length;
-                document.getElementById('stat-activos').innerText = cantidadActivos;
-
-                // 3. Desempeñados
-                const desempenados = datos.filter(item => item.estado === 'Desempeñado').length;
-                document.getElementById('stat-desempenados').innerText = desempenados;
-
-                // 4. Vencidos (Para la alerta roja)
-                const cantidadVencidos = todos.filter(e => e.estado === 'Rematado').length;
-                document.getElementById('stat-perdidos').innerText = cantidadVencidos;
-            }
-
-            // ===================================================
-            // PARTE 2: LA TABLA DE ACTIVIDAD RECIENTE 📉
-            // ===================================================
-
+            // ... dentro de cargarDashboard ...
 
             // 2. Cargar Tabla de Acciones Rápidas
             const resTabla = await fetch('/dashboard/tabla', {
@@ -210,6 +177,8 @@
                         tbody.appendChild(tr);
                     });
                 }
+            } else {
+                console.error('Error al cargar tabla de acciones rápidas');
             }
 
         } catch (error) {
