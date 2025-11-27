@@ -72,12 +72,12 @@
           <p class="stat-number" id="stat-activos">Cargando...</p>
         </div>
         <div class="card">
-          <h3>Clientes Registrados</h3>
-          <p class="stat-number" id="stat-clientes">Cargando...</p>
+          <h3>Articulos desmpeñados </h3>
+          <p class="stat-number" id="stat-desempenados">Cargando...</p>
         </div>
         <div class="card">
           <h3>Artículos en Remate</h3>
-          <p class="stat-number" id="stat-remate">Cargando...</p>
+          <p class="stat-number" id="stat-perdidos">Cargando...</p>
         </div>
       </section>
 
@@ -183,6 +183,27 @@
         } catch (error) {
             console.error('Error cargando dashboard:', error);
         }
+          // --- 2. FUNCIÓN MATEMÁTICA DE RESUMEN (NUEVO) ---
+    function calcularEstadisticas(datos) {
+        // 1. Total Histórico
+        document.getElementById('stat-total').innerText = datos.length;
+
+        // 2. Activos (Sumamos Vigentes y Vencidos, pues aun tienes la prenda)
+        const activos = datos.filter(item => 
+            item.estado === 'Vigente' || item.estado === 'Vencido'
+        ).length;
+        document.getElementById('stat-activos').innerText = activos;
+
+        // 3. Desempeñados (Ya pagaron y se fueron)
+        const desempenados = datos.filter(item => item.estado === 'Desempeñado').length;
+        document.getElementById('stat-desempenados').innerText = desempenados;
+
+        // 4. Perdidos (Rematados / Vendidos)
+        const perdidos = datos.filter(item => 
+            item.estado === 'Rematado' || item.estado === 'Vendido'
+        ).length;
+        document.getElementById('stat-perdidos').innerText = perdidos;
+    }
     }
     // Ejecutar cuando cargue la página
     document.addEventListener('DOMContentLoaded', cargarDashboard);
