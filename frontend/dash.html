@@ -163,20 +163,27 @@
                   filas.forEach(fila => {
                     const tr = document.createElement('tr');
 
+                    const accionString = (fila.accion || '').toString().trim();
                     // Normalizar acción para comparaciones más tolerantes
-                    const accionNorm = (fila.accion || '').toString().toLowerCase().trim().replace(/\s/g, '');
+                    const accionNorm = accionString
+                        .toLowerCase()
+                        .replace(/[áäàâ]/g, 'a')
+                        .replace(/[éëèê]/g, 'e')
+                        .replace(/[íïìî]/g, 'i')
+                        .replace(/[óöòô]/g, 'o')
+                        .replace(/[úüùû]/g, 'u')
+                        .replace(/\s/g, ''); 
                     // LÓGICA DE COLORES SEGÚN ACCIÓN (más flexible)
-                    let badgeClass = 'status-nuevo-empeno'; // Color por defecto (p.ej., Nuevo Empeño)
+                    let badgeClass = 'status-nuevo-empeno'; 
 
-                    // Comparamos sin espacios ni mayúsculas:
+                    // Comparamos sin espacios ni acentos:
                     if (accionNorm === 'ventaremate') {
                       badgeClass = 'status-venta-remate'; 
-                    } else if (accionNorm === 'desempeño' || accionNorm === 'desempeno') {
-                      // Se comprueba con y sin acento por si el backend varía
+                    } else if (accionNorm === 'desempeno') {
                       badgeClass = 'status-desempeno-accion'; 
                     } else if (accionNorm === 'refrendo') {
                       badgeClass = 'status-refrendo-accion'; 
-                    } else if (accionNorm === 'reevalúo' || accionNorm === 'reevaluo') {
+                    } else if (accionNorm === 'reevaluo') {
                       badgeClass = 'status-reevaluo-accion';
                     }
                     // Formato de moneda (asegurarnos número)
