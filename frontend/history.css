@@ -825,7 +825,7 @@ table tbody tr:nth-child(even) {
   text-align: center;
   min-width: 80px; /* Ancho mínimo para que se vea bien */
 }
-
+  
 /* 1. Estado Vigente (Verde) */
 .status-vigente {
   background-color: #28a745; /* Verde */
@@ -837,7 +837,7 @@ table tbody tr:nth-child(even) {
 }
 
 /* 3. Estado Desempeñado (Azul Oscuro) */
-.status-desempenado {
+.status-desempeñado {
   background-color: #113b64 !important; /* Cambiado a Azul Oscuro para que destaque */
 }
 
