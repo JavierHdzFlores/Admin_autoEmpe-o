@@ -343,7 +343,15 @@
 
         // Formatos
         const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.monto_prestamo);
-        const estadoClass = item.estado ? item.estado.toLowerCase().replace(/ñ/g, 'n') : '';
+        
+        // 🎯 CORRECCIÓN CLAVE: Normalización completa del estado para crear la clase CSS
+        const estadoClass = item.estado 
+          ? item.estado.toLowerCase()
+              .normalize("NFD") // Descompone caracteres (ñ -> n + tilde)
+              .replace(/[\u0300-\u036f]/g, "") // Elimina acentos/tildes
+              .replace(/\s/g, '') // Elimina espacios (por si acaso)
+          : '';
+          
         // Celdas
         const tdNombre = document.createElement('td'); tdNombre.style.fontWeight = 'bold'; tdNombre.style.color = '#113b64'; tdNombre.textContent = nombreMostrado;
         const tdFolio = document.createElement('td'); tdFolio.textContent = item.id;
@@ -351,8 +359,12 @@
         const tdMonto = document.createElement('td'); tdMonto.textContent = montoFmt;
         const tdFechaEmp = document.createElement('td'); tdFechaEmp.textContent = item.fecha_empeno || '';
         const tdVence = document.createElement('td'); tdVence.textContent = item.fecha_vencimiento || '';
+        
+        // Columna Estado (Aplicando las clases 'status' y 'status-xxx')
         const tdEstado = document.createElement('td');
-        const spanEstado = document.createElement('span'); spanEstado.className = `status status-${estadoClass}`; spanEstado.textContent = item.estado || '';
+        const spanEstado = document.createElement('span'); 
+        spanEstado.className = `status status-${estadoClass}`; 
+        spanEstado.textContent = item.estado || '';
         tdEstado.appendChild(spanEstado);
 
         // Acciones (botones)
