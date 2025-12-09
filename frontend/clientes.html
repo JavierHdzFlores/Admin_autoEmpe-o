@@ -471,7 +471,9 @@
                 // Adjuntamos referencia al cliente para poder mostrar nombre
                 empeno.cliente = {
                   nombre: cliente.nombre || '',
-                  apellidos: cliente.apellidos || ''
+                  apellidos: cliente.apellidos || '',
+                  telefono: cliente.telefono || '',
+                  direccion: cliente.direccion || ''
                 };
                 empenosEncontrados.push(empeno);
               });
