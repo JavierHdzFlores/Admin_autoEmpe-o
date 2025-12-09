@@ -111,15 +111,15 @@
           <div class="form-grid cols-3">
             <div class="input-group">
               <label for="dias-gracia-extra">Añadir Días de Gracia Extra</label>
-              <input type="number" id="dias-gracia-extra" name="dias-gracia-extra" value="2" min="0">
+              <input type="number" id="dias-gracia-extra" name="dias-gracia-extra" value="2" min="0" step="1" inputmode="numeric" pattern="^\\d+$">
             </div>
             <div class="input-group">
               <label for="abono-refrendo">Abono a Refrendo ($)</label>
-              <input type="number" id="abono-refrendo" name="abono-refrendo" step="0.01" placeholder="0.00">
+              <input type="number" id="abono-refrendo" name="abono-refrendo" step="1" min="0" inputmode="numeric" pattern="^\\d+$" placeholder="0">
             </div>
             <div class="input-group">
               <label for="abono-capital">Abono a Capital ($)</label>
-              <input type="number" id="abono-capital" name="abono-capital" step="0.01" placeholder="0.00">
+              <input type="number" id="abono-capital" name="abono-capital" step="1" min="0" inputmode="numeric" pattern="^\\d+$" placeholder="0">
             </div>
           </div>
           <h3 class="subsection-title">
@@ -418,6 +418,35 @@
     // 3. LISTENERS PARA QUE SE ACTUALICE AL ESCRIBIR (Se mantiene igual)
     document.getElementById('input-recargos').addEventListener('input', recalcularTotal);
     document.getElementById('input-multa').addEventListener('input', recalcularTotal);
+
+    // --- SANITIZACIÓN: solo ENTEROS POSITIVOS ---
+    function sanitizePositiveIntegerInput(el) {
+      if (!el) return;
+      el.addEventListener('input', () => {
+        // eliminar todo lo que no sea dígito
+        let v = String(el.value).replace(/[^0-9]/g, '');
+        // evitar valor vacío que pueda impedir validación nativa; dejamos '' si nada
+        // quitar ceros a la izquierda excepto si el valor es "0"
+        if (v.length > 1 && v.startsWith('0')) {
+          v = v.replace(/^0+/, '');
+        }
+        el.value = v;
+      });
+      // prevenir pegado de texto no numérico
+      el.addEventListener('paste', (e) => {
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        if (!/^[0-9]+$/.test(text)) {
+          e.preventDefault();
+        }
+      });
+    }
+
+    // Aplicar sanitización a los campos enteros del formulario
+    sanitizePositiveIntegerInput(document.getElementById('dias-gracia-extra'));
+    sanitizePositiveIntegerInput(document.getElementById('abono-refrendo'));
+    sanitizePositiveIntegerInput(document.getElementById('abono-capital'));
+    sanitizePositiveIntegerInput(document.getElementById('input-recargos'));
+    sanitizePositiveIntegerInput(document.getElementById('input-multa'));
 
     // 4. ACTUALIZAR EL BOTÓN DE PAGAR (Sugerencia de Backend)
     const btnPagar = document.getElementById('btn-pagar');
