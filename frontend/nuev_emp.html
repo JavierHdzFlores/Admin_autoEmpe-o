@@ -126,15 +126,15 @@
           <div class="form-grid cols-3">
             <div class="input-group">
               <label class="required" for="prestamo-valuo">Valor de Valúo ($)</label>
-              <input type="number" id="articulo-avaluo" name="prestamo-valuo" step="0.01" required>
+              <input type="number" id="articulo-avaluo" name="prestamo-valuo" step="0.01" min="0" inputmode="decimal" pattern="^\\d+(\\.\\d{1,2})?$" required>
             </div>
             <div class="input-group">
               <label class="required" for="prestamo-monto">Monto del Préstamo ($)</label>
-              <input type="number" id="prestamo-monto" name="prestamo-monto" step="0.01" required>
+              <input type="number" id="prestamo-monto" name="prestamo-monto" step="0.01" min="0" inputmode="decimal" pattern="^\\d+(\\.\\d{1,2})?$" required>
             </div>
             <div class="input-group">
               <label class="required" for="prestamo-interes">Interés Mensual (%)</label>
-              <input type="number" id="prestamo-interes" name="prestamo-interes" value="10" required>
+              <input type="number" id="prestamo-interes" name="prestamo-interes" value="10" min="0" step="0.01" inputmode="decimal" pattern="^\\d+(\\.\\d{1,2})?$" required>
             </div>
             
             <div class="input-group">
@@ -198,6 +198,34 @@
   const inputMonto = document.getElementById('prestamo-monto');
   const inputInteres = document.getElementById('prestamo-interes');
   const inputFechaInicio = document.getElementById('fecha-empeno');
+
+  // Sanitizar inputs numéricos: asegura solo números positivos y hasta 2 decimales
+  function sanitizePositiveNumericInput(inputEl) {
+    if (!inputEl) return;
+    inputEl.addEventListener('input', () => {
+      // Reemplaza comas por punto y quita todo lo que no sea dígito o punto
+      let v = inputEl.value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+      // Si hay más de un punto, dejar sólo el primero
+      const parts = v.split('.');
+      if (parts.length > 1) {
+        v = parts.shift() + '.' + parts.join('');
+      }
+      // Limitar a dos decimales
+      if (v.indexOf('.') >= 0) {
+        const [intPart, decPart] = v.split('.');
+        v = intPart + '.' + decPart.slice(0, 2);
+      }
+      // Evitar valores negativos (el input tipo=number podría permitir '-' en algunas teclas)
+      if (v.startsWith('-')) v = v.replace('-', '');
+      inputEl.value = v;
+    });
+  }
+
+  // Aplicar sanitización a los campos relevantes
+  sanitizePositiveNumericInput(inputMonto);
+  sanitizePositiveNumericInput(inputInteres);
+  const inputAvaluo = document.getElementById('articulo-avaluo');
+  sanitizePositiveNumericInput(inputAvaluo);
 
   function calcularTotales() {
     const monto = parseFloat(inputMonto.value) || 0;
