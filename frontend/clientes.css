@@ -871,21 +871,30 @@
 /* 1. Estado Vigente (Verde) */
 .status-vigente {
     background-color: #28a745; 
+    color: white;
 }
 
 /* 2. Estado Desempeñado (Azul Oscuro - Finalización exitosa) */
 .status-desempenado { 
     background-color: var(--color-azul-oscuro); /* #113b64 */
+    color: white;
 }
 
 /* 3. Estado Vencido (Rojo - Alerta) */
 .status-vencido {
     background-color: #dc3545; 
+    color: white;
 }
 
 /* 4. Estado Rematado (Gris Oscuro - Liquidado) */
 .status-rematado {
     background-color: #6c757d; 
+    color: white;
+}
+
+.status-vendido {
+    background-color: #795548; /* Un tono de marrón/café */
+    color: white;
 }
 /* ¡Eliminada la regla duplicada que causaba el color gris! */
 

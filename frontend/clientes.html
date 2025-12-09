@@ -75,6 +75,7 @@
                   <option value="Vencido">Vencido</option>
                   <option value="Desempeñado">Desempeñado</option>
                   <option value="Rematado">Rematado</option>
+                  <option value="Vendido">Vendido</option>
               </select>
           </div>
 
@@ -120,7 +121,6 @@
         </div>
 
       </div>
-      <!-- Aqui podemos agregar un apartado para que muestre la información del cliente -->
       <div id="seccion-editar-cliente" class="edit-card" style="display: none;">
         <div class="edit-header">
             <h3><span class="icon">&#9999;&#65039;</span> Detalles y Edición del Cliente</h3>
@@ -298,7 +298,7 @@
 
         // 4. Perdidos (Rematados / Vendidos)
         const perdidos = datos.filter(item => 
-            item.estado === 'Rematado' || item.estado === 'Vendido'
+            item.estado === 'Rematado' || item.estado === 'Vendido' // 🎯 AÑADIDO 'Vendido'
         ).length;
         document.getElementById('stat-perdidos').innerText = perdidos;
     }
@@ -344,7 +344,7 @@
         // Formatos
         const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(item.monto_prestamo);
         
-        // 🎯 CORRECCIÓN CLAVE: Normalización completa del estado para crear la clase CSS
+        // 🎯 Normalización completa del estado para crear la clase CSS
         const estadoClass = item.estado 
           ? item.estado.toLowerCase()
               .normalize("NFD") // Descompone caracteres (ñ -> n + tilde)
@@ -387,7 +387,7 @@
             // Usar closure para pasar valores seguros
             btnRemate.addEventListener('click', () => enviarARemate(item.id, item.marca_modelo));
             accionesCont.appendChild(btnRemate);
-        } else if (item.estado === 'Rematado') {
+        } else if (item.estado === 'Rematado' || item.estado === 'Vendido') { // 🎯 AÑADIDO 'Vendido'
             const aviso = document.createElement('span'); aviso.style.fontSize = '0.8em'; aviso.style.color = 'orange'; aviso.textContent = '';
             accionesCont.appendChild(aviso);
         }
