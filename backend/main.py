@@ -201,6 +201,12 @@ def rematar_empeno(id: int, db: Session = Depends(get_db), token: str = Depends(
     return {"mensaje": "Artículo enviado a remate", "estado": resultado.estado}
 
 
+@app.get("/empenos/remates")
+def obtener_remates(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    """Devuelve los empeños que están en remate o vendidos, con el precio de venta si existe."""
+    return crud.get_empenos_remates_con_precio(db)
+
+
 # Endpoint temporal para depuración: listar movimientos de caja recientes
 @app.get("/movimientos/recientes")
 def obtener_movimientos_recientes(limit: int = 20, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):

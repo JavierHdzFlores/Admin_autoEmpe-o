@@ -259,6 +259,44 @@ def mover_a_remate(db: Session, empeno_id: int):
         db.refresh(empeno)
     return empeno
 
+
+def get_empenos_remates_con_precio(db: Session):
+    """
+    Devuelve los empeños que están en remate o ya fueron vendidos, incluyendo
+    si existe el monto de venta registrado en movimientos de caja (tipo 'venta').
+    """
+    empenos = db.query(models.Empeno).filter(
+        (models.Empeno.estado == models.EstadoEmpeno.rematado) | (models.Empeno.estado == models.EstadoEmpeno.vendido)
+    ).order_by(models.Empeno.fecha_empeno.desc()).all()
+
+    resultado = []
+    for e in empenos:
+        # Buscar el último movimiento de tipo 'venta' para este empeño (si existe)
+        mov_venta = db.query(models.MovimientoCaja).filter(
+            models.MovimientoCaja.empeno_id == e.id,
+            models.MovimientoCaja.tipo_movimiento == models.TipoMovimiento.venta
+        ).order_by(models.MovimientoCaja.fecha_movimiento.desc()).first()
+
+        precio_venta = float(mov_venta.monto) if mov_venta else None
+
+        cliente_nombre = 'Desconocido'
+        if e.cliente:
+            cliente_nombre = f"{e.cliente.nombre} {e.cliente.apellidos}"
+
+        resultado.append({
+            'id': e.id,
+            'cliente': cliente_nombre,
+            'cliente_id': e.cliente_id,
+            'articulo': e.marca_modelo,
+            'monto_prestamo': float(e.monto_prestamo),
+            'fecha_empeno': str(e.fecha_empeno),
+            'fecha_vencimiento': str(e.fecha_vencimiento) if e.fecha_vencimiento else None,
+            'estado': e.estado.value if hasattr(e.estado, 'value') else str(e.estado),
+            'precio_venta': precio_venta
+        })
+
+    return resultado
+
 # --- ACTUALIZAR EMPEÑO Y CLIENTE ---
 def editar_empeno_completo(db: Session, empeno_id: int, datos: schemas.EdicionCompletaRequest):
     # 1. Buscar el Empeño
