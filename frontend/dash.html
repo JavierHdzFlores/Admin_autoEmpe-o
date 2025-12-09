@@ -167,16 +167,16 @@
                     const accionNorm = (fila.accion || '').toString().toLowerCase().trim();
 
                     // LÓGICA DE COLORES SEGÚN ACCIÓN (más flexible)
-                    let badgeClass = 'status-vigente'; // Por defecto
+                    let badgeClass = 'status-nuevo-empeno'; // Color por defecto (p.ej., Nuevo Empeño)
 
-                    if (accionNorm.includes('nuevo')) {
-                      badgeClass = 'status-nuevo';
-                    } else if (accionNorm.includes('desempe') || accionNorm.includes('venta')) {
-                      badgeClass = 'status-desempeno';
-                    } else if (accionNorm.includes('refrendo')) {
-                      badgeClass = 'status-refrendo';
-                    } else if (accionNorm.includes('reevalu') || accionNorm.includes('reeval')) {
-                      badgeClass = 'status-reevaluo';
+                    if (accionNorm === 'venta remate') {
+                      badgeClass = 'status-venta-remate'; 
+                    } else if (accionNorm === 'desempeño') {
+                      badgeClass = 'status-desempeno-accion'; 
+                    } else if (accionNorm === 'refrendo') {
+                      badgeClass = 'status-refrendo-accion'; 
+                    } else if (accionNorm === 'reevalúo') {
+                      badgeClass = 'status-reevaluo-accion';
                     }
 
                     // Formato de moneda (asegurarnos número)
