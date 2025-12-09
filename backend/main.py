@@ -216,7 +216,7 @@ def obtener_remates(db: Session = Depends(get_db), token: str = Depends(oauth2_s
 @app.get("/movimientos/recientes")
 def obtener_movimientos_recientes(limit: int = 20, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     """Devuelve los últimos movimientos de caja con información del empeño y cliente (si existe).
-    Útil para depurar por qué el dashboard no muestra Refrendos/Desempeños/Ventas.
+    Útil para depurar por qué el dashboard no muestra Refrendos/Desempeños/Ventas/Nuevo empeño .
     """
     movimientos = db.query(models.MovimientoCaja).order_by(models.MovimientoCaja.fecha_movimiento.desc()).limit(limit).all()
     resultado = []
