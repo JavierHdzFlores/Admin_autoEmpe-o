@@ -302,28 +302,43 @@ function renderizarTabla(lista) {
   </script>
 
   <style>
-      .status-rematado { background-color: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
-      .status-vendido { background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
-      
-        .btn-vender {
-          background-color: #f5b301; /* color primario (amarillo) */
-          color: #113b64; /* texto azul oscuro */
-          border: none;
-          padding: 6px 10px;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: 600;
-        }
-        .btn-vender:hover { background-color: #113b64; color: #ffffff; }
-        .sold-label {
-          display: inline-block;
-          background: #f1f1f1;
-          color: #6c757d;
-          padding: 6px 10px;
-          border-radius: 6px;
-          font-weight: 600;
-          font-size: 0.95em;
-        }
-  </style>
+  /* 1. Estado Disponible (Mapeado a .status-en-venta en JS) -> AHORA VERDE */
+  .status-en-venta { 
+    background-color: #28a745; /* VERDE (Color de Vigente/Éxito) */ 
+    color: white; 
+    padding: 4px 8px; 
+    border-radius: 4px; 
+    font-weight: bold; 
+  }
+  
+  /* 2. Estado Vendido -> AHORA GRIS */
+  .status-vendido { 
+    background-color: #6c757d; /* GRIS PLOMO (Color neutral para algo finalizado) */ 
+    color: white; 
+    padding: 4px 8px; 
+    border-radius: 4px; 
+    font-weight: bold; 
+  }
+  
+  .btn-vender {
+    background-color: #f5b301; /* color primario (amarillo) */
+    color: #113b64; /* texto azul oscuro */
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn-vender:hover { background-color: #113b64; color: #ffffff; }
+  .sold-label {
+    display: inline-block;
+    background: #f1f1f1;
+    color: #6c757d;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+</style>
 </body>
 </html>
