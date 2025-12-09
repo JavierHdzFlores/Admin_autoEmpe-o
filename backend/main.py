@@ -121,8 +121,13 @@ def registrar_refrendo(id: int, db: Session = Depends(get_db), token: str = Depe
     if not empeno:
         raise HTTPException(status_code=404, detail="Empeño no encontrado")
 
+    # B. Validación de negocio: No permitir refrendo si el empeño está en 'Vigente'
+    # (UX/Seguridad: el frontend ya deshabilita la opción, pero reforzamos en backend)
+    if hasattr(models, 'EstadoEmpeno') and empeno.estado == models.EstadoEmpeno.vigente:
+        raise HTTPException(status_code=400, detail="No se puede registrar refrendo para un empeño en estado Vigente")
 
-    # B. Calculamos monto (Por ahora fijo o calculado simple)
+
+    # C. Calculamos monto (Por ahora fijo o calculado simple)
     # En un sistema real, recibiríamos el monto exacto del frontend.
     monto_cobrado = empeno.monto_prestamo * empeno.interes_mensual_pct / 100
     
