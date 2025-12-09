@@ -147,12 +147,12 @@
 
             <div class="summary-item penalty">
                 <span>Recargos de dias de gracia:</span>
-                <input type="number" id="input-recargos" value="0.00" step="1.00" class="input-monto-editable">
+                <input type="number" id="input-recargos" value="0" step="1" min="0" inputmode="numeric" pattern="^\\d+$" class="input-monto-editable">
               </div>
 
               <div class="summary-item penalty">
                 <span>Multa (Por retraso):</span>
-                <input type="number" id="input-multa" value="0.00" step="1.00" class="input-monto-editable">
+                <input type="number" id="input-multa" value="0" step="1" min="0" inputmode="numeric" pattern="^\\d+$" class="input-monto-editable">
               </div>
             <div class="summary-item-details">
               <span id="resumen-mensaje">(Selecciona un empeño para calcular)</span>
@@ -410,6 +410,24 @@
     // Listeners para que funcione al editar
     document.getElementById('input-recargos').addEventListener('input', recalcularTotal);
     document.getElementById('input-multa').addEventListener('input', recalcularTotal);
+
+    // --- SANITIZACIÓN: solo ENTEROS POSITIVOS (igual que en ref.html) ---
+    function sanitizePositiveIntegerInput(el) {
+      if (!el) return;
+      el.addEventListener('input', () => {
+        let v = String(el.value).replace(/[^0-9]/g, '');
+        if (v.length > 1 && v.startsWith('0')) v = v.replace(/^0+/, '');
+        el.value = v;
+      });
+      el.addEventListener('paste', (e) => {
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        if (!/^[0-9]+$/.test(text)) e.preventDefault();
+      });
+    }
+
+    // Aplicar sanitización a los inputs relevantes
+    sanitizePositiveIntegerInput(document.getElementById('input-recargos'));
+    sanitizePositiveIntegerInput(document.getElementById('input-multa'));
 
 
     // --- 4. COBRAR (Submit) ---
