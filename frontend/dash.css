@@ -317,7 +317,7 @@ table tbody tr:nth-child(even) {
 
 /* 1. Venta Remate */
 .status-venta-remate {
-    background-color: #dc3545; /* Rojo */
+    background-color: #795548; /* Cafe */
     color: white;
 }
 
