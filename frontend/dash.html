@@ -161,32 +161,30 @@
                   tbody.appendChild(trEmpty);
                 } else {
                   filas.forEach(fila => {
-                    const tr = document.createElement('tr');
+                  const tr = document.createElement('tr');
 
-                    const accionString = (fila.accion || '').toString().trim();
-                    // Normalizar acción para comparaciones más tolerantes
-                    const accionNorm = accionString
+                    // 1. Normalización ROBUSTA: 
+                    // a) Pasar a minúsculas. b) Eliminar acentos. c) Quitar espacios.
+                    const accionNorm = (fila.accion || '').toString()
                         .toLowerCase()
-                        .replace(/[áäàâ]/g, 'a')
-                        .replace(/[éëèê]/g, 'e')
-                        .replace(/[íïìî]/g, 'i')
-                        .replace(/[óöòô]/g, 'o')
-                        .replace(/[úüùû]/g, 'u')
-                        .replace(/\s/g, ''); 
-                    // LÓGICA DE COLORES SEGÚN ACCIÓN (más flexible)
-                    let badgeClass = 'status-nuevo-empeno'; 
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita acentos
+                        .replace(/\s/g, ''); // Quita espacios
 
-                    // Comparamos sin espacios ni acentos:
+                    // 🎯 LÓGICA DE ASIGNACIÓN:
+                    let badgeClass = 'status-nuevo-empeno'; // Por defecto
+
                     if (accionNorm === 'ventaremate') {
                       badgeClass = 'status-venta-remate'; 
-                    } else if (accionNorm === 'desempeno') {
+                    } else if (accionNorm === 'desempeno') { // Busca "desempeno" sin acento ni espacios
                       badgeClass = 'status-desempeno-accion'; 
                     } else if (accionNorm === 'refrendo') {
                       badgeClass = 'status-refrendo-accion'; 
                     } else if (accionNorm === 'reevaluo') {
                       badgeClass = 'status-reevaluo-accion';
                     }
-                    // Formato de moneda (asegurarnos número)
+                    // FIN DE LA LÓGICA
+
+                    // Formato de moneda (se omite para brevedad)
                     const montoVal = Number(fila.monto) || 0;
                     const signo = montoVal < 0 ? '-' : '+';
                     const montoFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(Math.abs(montoVal));
@@ -200,7 +198,10 @@
 
                     const tdAccion = document.createElement('td');
                     const spanAcc = document.createElement('span');
-                    spanAcc.className = 'status ' + badgeClass;
+                    
+                    // 💥 PUNTO CRÍTICO: Aseguramos que 'status' y la clase de color se añadan.
+                    spanAcc.className = 'status ' + badgeClass; 
+                    
                     spanAcc.textContent = fila.accion || '';
                     tdAccion.appendChild(spanAcc);
 
@@ -215,8 +216,7 @@
                     tr.appendChild(tdFecha);
 
                     tbody.appendChild(tr);
-                  });
-                }
+                });}
             } else {
                 console.error('Error al cargar tabla de acciones rápidas');
             }
