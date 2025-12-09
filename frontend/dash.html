@@ -170,17 +170,17 @@
                         .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita acentos
                         .replace(/\s/g, ''); // Quita espacios
 
-                    // 🎯 LÓGICA DE ASIGNACIÓN:
-                    let badgeClass = 'status-nuevo-empeno'; // Por defecto
+                    // 🎯 LÓGICA DE ASIGNACIÓN (Asegurando la coincidencia con las clases CSS):
+                    let badgeClass = 'status-nuevo-empeno'; // Por defecto (Azul Oscuro)
 
                     if (accionNorm === 'ventaremate') {
                       badgeClass = 'status-venta-remate'; 
-                    } else if (accionNorm === 'desempeno') { // Busca "desempeno" sin acento ni espacios
+                    } else if (accionNorm === 'desempeno') { 
                       badgeClass = 'status-desempeno-accion'; 
                     } else if (accionNorm === 'refrendo') {
                       badgeClass = 'status-refrendo-accion'; 
                     } else if (accionNorm === 'reevaluo') {
-                      badgeClass = 'status-reevaluo-accion';
+                      badgeClass = 'status-reevaluo-accion'; // Corrección de coincidencia
                     }
                     // FIN DE LA LÓGICA
 
@@ -199,7 +199,7 @@
                     const tdAccion = document.createElement('td');
                     const spanAcc = document.createElement('span');
                     
-                    // 💥 PUNTO CRÍTICO: Aseguramos que 'status' y la clase de color se añadan.
+                    // 💥 LÍNEA CRÍTICA: La clase 'status' DEBE estar aquí para el relleno.
                     spanAcc.className = 'status ' + badgeClass; 
                     
                     spanAcc.textContent = fila.accion || '';

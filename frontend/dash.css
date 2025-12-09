@@ -305,42 +305,41 @@ table tbody tr:nth-child(even) {
     display: block;
   }
 }
-
 /* Colores para las Acciones Rápidas */
 .status {
-    display: inline-block;
-    padding: 4px 8px;
+    display: inline-block; /* ESTO HABILITA EL RELLENO */
+    padding: 4px 8px;      /* ESTO DEFINE EL RELLENO */
     border-radius: 4px;
     font-size: 0.85em;
     font-weight: bold;
-    text-transform: uppercase; /* Opcional: para que se vean mejor */
+    text-transform: uppercase; 
 }
 
-/* 1. Venta Remate (Color: Rojo/Naranja para indicar venta/liquidación) */
+/* 1. Venta Remate */
 .status-venta-remate {
     background-color: #dc3545; /* Rojo */
     color: white;
 }
 
-/* 2. Desempeño (Color: Verde para indicar cierre exitoso) */
-.status-desempeno-accion { /* Renombrado para evitar conflicto */
+/* 2. Desempeño */
+.status-desempeno-accion {
     background-color: #28a745; /* Verde */
     color: white;
 }
 
-/* 3. Refrendo (Color: Amarillo/Dorado para indicar prórroga) */
-.status-refrendo-accion { /* Renombrado para evitar conflicto */
+/* 3. Refrendo */
+.status-refrendo-accion {
     background-color: #ffc107; /* Amarillo */
     color: var(--color-azul-oscuro); 
 }
 
-/* 4. UTM (Color: Azul oscuro, si fuera una acción de Nuevo Empeño) */
+/* 4. Nuevo Empeño (por defecto) */
 .status-nuevo-empeno {
     background-color: var(--color-azul-oscuro); 
     color: white;
 }
 
-/* Puedes añadir más si aparecen: Revalúo, etc. */
+/* 5. Revalúo */
 .status-reevaluo-accion {
     background-color: #6f42c1; /* Púrpura */
     color: white;
