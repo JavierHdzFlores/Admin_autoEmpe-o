@@ -787,17 +787,26 @@ table tbody tr:nth-child(even) {
   font-size: 1.05em;
 }
 
-/* Nuevos estados para la tabla de remate */
+.status {
+  padding: 4px 10px;
+  border-radius: 6px; 
+  font-size: 12px;
+  font-weight: bold;
+  color: white; /* CRÍTICO: Texto blanco para contraste */
+  display: inline-block; /* CRÍTICO: Asegura que el padding se aplique */
+  text-align: center;
+  min-width: 80px; 
+}
+
+/* 1. Estado EN VENTA (usamos verde para destacar que está listo para venderse) */
 .status-en-venta {
   background-color: #28a745; /* Verde */
-  color: white;
 }
 
+/* 2. Estado VENDIDO (usamos un color neutral) */
 .status-vendido {
   background-color: #6c757d; /* Gris */
-  color: white;
 }
-
 /* =LETRA MÁS PEQUEÑA EN LA TABLA DE REMATE PARA QUE QUEPA */
 .remate-list-content th,
 .remate-list-content td {

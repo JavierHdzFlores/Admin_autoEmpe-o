@@ -150,72 +150,90 @@
 
     // 2. DIBUJAR TABLA
     function renderizarTabla(lista) {
-      const tbody = document.getElementById('tabla-remates-body');
-      // Limpiar de forma segura
-      while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+  const tbody = document.getElementById('tabla-remates-body');
+  // Limpiar de forma segura
+  while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
 
-      if (!lista || lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">No hay artículos en remate o vendidos.</td></tr>';
-        return;
-      }
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">No hay artículos en venta o vendidos.</td></tr>';
+    return;
+  }
 
-      lista.forEach(item => {
-        const tr = document.createElement('tr');
+  lista.forEach(item => {
+    const tr = document.createElement('tr');
 
-        const folio = item.id;
-        const clienteNombre = item.cliente ? (item.cliente || item.cliente).toString() : (item.cliente_id ? `Cliente #${item.cliente_id}` : '-');
-        // Si el backend envía 'cliente' como string ya formateada, úsala; sino intenta construir
-        const clienteTexto = typeof item.cliente === 'string' ? item.cliente : (item.cliente || '-') ;
-        const articulo = item.articulo || item.marca_modelo || '-';
-        const montoPrestamo = Number(item.monto_prestamo) || 0;
-        const precioSugerido = montoPrestamo * 1.6; // Sugerido: 160% del préstamo
+    const folio = item.id;
+    const clienteTexto = typeof item.cliente === 'string' ? item.cliente : (item.cliente || '-') ;
+    const articulo = item.articulo || item.marca_modelo || '-';
+    const montoPrestamo = Number(item.monto_prestamo) || 0;
+    const precioSugerido = montoPrestamo * 1.6;
 
-        // precio vendido: preferimos el campo precio_venta que devuelve el backend
-        const precioAdquirido = (item.precio_venta !== null && item.precio_venta !== undefined)
-            ? Number(item.precio_venta)
-            : (item.precio_adquirido !== undefined ? item.precio_adquirido : null);
+    const precioAdquirido = (item.precio_venta !== null && item.precio_venta !== undefined)
+        ? Number(item.precio_venta)
+        : (item.precio_adquirido !== undefined ? item.precio_adquirido : null);
 
-        const fechaIngreso = item.fecha_empeno || item.fecha_ingreso || item.fecha_vencimiento || '-';
+    const fechaIngreso = item.fecha_empeno || item.fecha_ingreso || item.fecha_vencimiento || '-';
 
-        // Estado y acción
-        const estadoTxt = item.estado || '-';
-
-        const tdFolio = document.createElement('td'); tdFolio.textContent = folio;
-        const tdCliente = document.createElement('td'); tdCliente.style.fontWeight = 'bold'; tdCliente.innerHTML = escapeHtml(String(clienteTexto));
-        const tdArticulo = document.createElement('td'); tdArticulo.innerHTML = escapeHtml(String(articulo));
-        const tdPrecioSug = document.createElement('td'); tdPrecioSug.textContent = formatoMoneda.format(precioSugerido);
-        const tdPrecioVen = document.createElement('td'); tdPrecioVen.style.fontWeight = '600'; tdPrecioVen.textContent = precioAdquirido !== null ? formatoMoneda.format(precioAdquirido) : '-';
-        const tdFecha = document.createElement('td'); tdFecha.textContent = fechaIngreso;
-        const tdEstado = document.createElement('td'); tdEstado.innerHTML = `<span class="status ${estadoTxt.toLowerCase()}">${escapeHtml(String(estadoTxt))}</span>`;
-        const tdAccion = document.createElement('td');
-
-        // Acción: botón vender solo si está en Rematado (En Venta)
-        if ((item.estado || '').toString() === 'Rematado') {
-          const btn = document.createElement('button');
-          btn.className = 'btn-vender';
-          btn.textContent = '💲 Vender';
-          btn.addEventListener('click', () => venderArticulo(item.id, articulo, precioSugerido));
-          tdAccion.appendChild(btn);
-        } else if ((item.estado || '').toString() === 'Vendido') {
-          // Si ya está vendido, mostramos una etiqueta de estado (texto) con estilo
-          const soldTag = document.createElement('span');
-          soldTag.className = 'sold-label';
-          soldTag.textContent = 'Artículo Vendido';
-          tdAccion.appendChild(soldTag);
-        }
-
-        tr.appendChild(tdFolio);
-        tr.appendChild(tdCliente);
-        tr.appendChild(tdArticulo);
-        tr.appendChild(tdPrecioSug);
-        tr.appendChild(tdPrecioVen);
-        tr.appendChild(tdFecha);
-        tr.appendChild(tdEstado);
-        tr.appendChild(tdAccion);
-
-        tbody.appendChild(tr);
-      });
+    // Estado y acción
+    const estadoTxt = item.estado || 'Disponible';
+    
+    // 💡 CORRECCIÓN: Estandarizar la clase CSS
+    let estadoClase;
+    if (estadoTxt === 'Disponible' || estadoTxt === 'Rematado') {
+        estadoClase = 'en-venta'; 
+    } else if (estadoTxt === 'Vendido') {
+        estadoClase = 'vendido'; 
+    } else {
+        estadoClase = 'default';
     }
+
+    const tdFolio = document.createElement('td'); tdFolio.textContent = folio;
+    const tdCliente = document.createElement('td'); tdCliente.style.fontWeight = 'bold'; tdCliente.innerHTML = escapeHtml(String(clienteTexto));
+    const tdArticulo = document.createElement('td'); tdArticulo.innerHTML = escapeHtml(String(articulo));
+    const tdPrecioSug = document.createElement('td'); tdPrecioSug.textContent = formatoMoneda.format(precioSugerido);
+    
+    const tdPrecioVen = document.createElement('td'); 
+    tdPrecioVen.style.fontWeight = '600'; 
+    // Aplicamos la clase 'price-venta' si ya está vendido y tiene precio
+    if (precioAdquirido !== null && estadoTxt === 'Vendido') {
+      tdPrecioVen.className = 'price-venta';
+    }
+    tdPrecioVen.textContent = precioAdquirido !== null ? formatoMoneda.format(precioAdquirido) : '-';
+    
+    const tdFecha = document.createElement('td'); tdFecha.textContent = fechaIngreso;
+    
+    // Aplicar clase CSS estandarizada: USAMOS LA CLASE BASE .status
+    const tdEstado = document.createElement('td'); tdEstado.innerHTML = `<span class="status status-${estadoClase}">${escapeHtml(String(estadoTxt))}</span>`;
+    
+    const tdAccion = document.createElement('td');
+
+    // Acción: botón vender solo si está en Disponible
+    if (estadoTxt === 'Disponible') {
+      const btn = document.createElement('button');
+      btn.className = 'btn-vender';
+      btn.textContent = '💲 Vender';
+      btn.addEventListener('click', () => venderArticulo(item.id, articulo, precioSugerido));
+      tdAccion.appendChild(btn);
+    } else if (estadoTxt === 'Vendido') {
+      // Si ya está vendido, mostramos una etiqueta de estado (texto) con estilo
+      const soldTag = document.createElement('span');
+      soldTag.className = 'sold-label';
+      soldTag.textContent = 'Artículo Vendido';
+      tdAccion.appendChild(soldTag);
+    }
+
+    tr.appendChild(tdFolio);
+    tr.appendChild(tdCliente);
+    tr.appendChild(tdArticulo);
+    tr.appendChild(tdPrecioSug);
+    tr.appendChild(tdPrecioVen);
+    tr.appendChild(tdFecha);
+    tr.appendChild(tdEstado);
+    tr.appendChild(tdAccion);
+
+    tbody.appendChild(tr);
+  });
+}
 
     // 3. BUSCADOR
     const inputBus = document.getElementById('busqueda-remate');
