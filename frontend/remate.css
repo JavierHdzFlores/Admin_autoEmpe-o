@@ -801,7 +801,7 @@ table tbody tr:nth-child(even) {
 
 /* 1. ESTADO VIGENTE (Verde) */
 .status-vigente {
-  background-color: #28a745; 
+  background-color: #6c757d; 
 }
 
 /* 2. ESTADO VENDIDO (Café/Marrón) */

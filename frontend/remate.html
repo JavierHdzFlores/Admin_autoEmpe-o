@@ -181,7 +181,7 @@ function renderizarTabla(lista) {
     // 💡 CORRECCIÓN: Estandarizar la clase CSS (Rematado/Disponible = en-venta)
     let estadoClase;
     // Si el estado es 'Disponible' o 'Rematado' (sin ñ), lo consideramos 'en-venta'
-    if (estadoTxt === 'Disponible' || estadoTxt === 'Rematado') {
+    if (estadoTxt === 'Disponible' || estadoTxt === 'Disponible') {
         estadoClase = 'en-venta'; 
     } else if (estadoTxt === 'Vendido') {
         estadoClase = 'vendido'; 
