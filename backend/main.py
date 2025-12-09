@@ -100,7 +100,7 @@ def obtener_resumen(db: Session = Depends(get_db), token: str = Depends(oauth2_s
 @app.get("/dashboard/tabla")
 def obtener_tabla_dashboard(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     # Llamamos a la nueva función que mezcla todo
-    datos = crud.get_actividad_reciente(db, limite=7)
+    datos = crud.get_actividad_reciente(db, limite=30)
     return datos
 
 # --- RUTA DE BÚSQUEDA DE CLIENTES ---
