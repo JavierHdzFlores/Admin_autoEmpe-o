@@ -197,10 +197,11 @@
           btn.addEventListener('click', () => venderArticulo(item.id, articulo, precioSugerido));
           tdAccion.appendChild(btn);
         } else if ((item.estado || '').toString() === 'Vendido') {
-          // si ya fue vendido, mostramos el precio
-          const span = document.createElement('span'); span.style.color = 'grey'; span.style.fontSize = '0.9em';
-          span.textContent = precioAdquirido !== null ? formatoMoneda.format(precioAdquirido) : '-';
-          tdAccion.appendChild(span);
+          // Si ya está vendido, mostramos una etiqueta de estado (texto) con estilo
+          const soldTag = document.createElement('span');
+          soldTag.className = 'sold-label';
+          soldTag.textContent = 'Artículo Vendido';
+          tdAccion.appendChild(soldTag);
         }
 
         tr.appendChild(tdFolio);
@@ -286,6 +287,15 @@
           font-weight: 600;
         }
         .btn-vender:hover { background-color: #113b64; color: #ffffff; }
+        .sold-label {
+          display: inline-block;
+          background: #f1f1f1;
+          color: #6c757d;
+          padding: 6px 10px;
+          border-radius: 6px;
+          font-weight: 600;
+          font-size: 0.95em;
+        }
   </style>
 </body>
 </html>
