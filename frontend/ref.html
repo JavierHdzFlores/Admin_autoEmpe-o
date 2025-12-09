@@ -215,11 +215,16 @@
      * sea solo por fecha (medianoche).
      */
     function calcularDiasDiferencia(fechaMenorStr, fechaMayor) {
-        // 1. Crear fecha de vencimiento a medianoche
-        const fechaMenor = new Date(fechaMenorStr + 'T00:00:00'); 
-        
-        // 2. Crear fecha de HOY a medianoche (solo día)
-        const fechaMayorSoloDia = new Date(fechaMayor.getFullYear(), fechaMayor.getMonth(), fechaMayor.getDate());
+      // 1. Crear fecha de vencimiento a medianoche (acepta formatos 'YYYY-MM-DD' o ISO)
+      let fechaMenor = new Date(fechaMenorStr);
+      if (isNaN(fechaMenor.getTime())) {
+        // intenta con sufijo T00:00:00 para formatos simples
+        fechaMenor = new Date(fechaMenorStr + 'T00:00:00');
+      }
+      fechaMenor.setHours(0,0,0,0);
+
+      // 2. Crear fecha de HOY a medianoche (solo día)
+      const fechaMayorSoloDia = new Date(fechaMayor.getFullYear(), fechaMayor.getMonth(), fechaMayor.getDate());
 
         const diffTime = fechaMayorSoloDia - fechaMenor;
         
@@ -310,9 +315,13 @@
                         btn.addEventListener('click', () => seleccionarEmpeno(
                           empeno.id,
                           empeno.fecha_vencimiento,
-                          empeno.monto_prestamo,
+                          // asegurar que monto sea numérico
+                          Number(empeno.monto_prestamo),
                           nombreCompleto,
-                          empeno.marca_modelo
+                          empeno.marca_modelo,
+                          // pasar datos de cliente opcionales si existen
+                          cliente.telefono || '',
+                          cliente.direccion || ''
                         ));
                       } else {
                         // Vigente -> no se puede refrendar: mostrar botón deshabilitado
@@ -370,19 +379,26 @@
     let interesBaseGlobal = 0; 
 
     // --- FUNCIÓN DE SELECCIÓN (MODIFICADA LA LÍNEA DEL MENSAJE) ---
-    window.seleccionarEmpeno = function(id, fechaVencimientoStr, montoPrestamo, nombreCliente, nombreArticulo) {
-        empenoSeleccionadoId = id;
+    window.seleccionarEmpeno = function(id, fechaVencimientoStr, montoPrestamo, nombreCliente, nombreArticulo, telefono, direccion) {
+      empenoSeleccionadoId = id;
 
-        // 1. Llenar datos informativos
-        document.getElementById('info-cliente').value = nombreCliente;
-        document.getElementById('info-articulo').value = nombreArticulo;
-        document.getElementById('info-prestamo').value = `$${montoPrestamo.toFixed(2)}`;
-        document.getElementById('info-vencimiento').value = fechaVencimientoStr;
+      // Asegurar que montoPrestamo sea número
+      const montoNum = (typeof montoPrestamo === 'number') ? montoPrestamo : Number(montoPrestamo);
+      const montoFinal = isNaN(montoNum) ? 0 : montoNum;
 
-        // 2. Calcular Interés Base (Refrendo)
-        interesBaseGlobal = montoPrestamo * 0.10; // 10% de interés base
-        document.getElementById('info-interes').value = `$${interesBaseGlobal.toFixed(2)}`;
-        document.getElementById('resumen-base').innerText = `$${interesBaseGlobal.toFixed(2)}`;
+      // 1. Llenar datos informativos (mostrar teléfono/dirección si están disponibles)
+      let clienteDisplay = nombreCliente || '';
+      if (telefono) clienteDisplay += ` - Tel: ${telefono}`;
+      if (direccion) clienteDisplay += ` | ${direccion}`;
+      document.getElementById('info-cliente').value = clienteDisplay;
+      document.getElementById('info-articulo').value = nombreArticulo || '';
+      document.getElementById('info-prestamo').value = `$${montoFinal.toFixed(2)}`;
+      document.getElementById('info-vencimiento').value = fechaVencimientoStr;
+
+      // 2. Calcular Interés Base (Refrendo)
+      interesBaseGlobal = montoFinal * 0.10; // 10% de interés base
+      document.getElementById('info-interes').value = `$${interesBaseGlobal.toFixed(2)}`;
+      document.getElementById('resumen-base').innerText = `$${interesBaseGlobal.toFixed(2)}`;
 
         // 3. CALCULAR EL ESTADO Y RETRASO
         const { estado, diasRetraso, diasTotalesGracia } = calcularEstadoYRetraso(fechaVencimientoStr);
@@ -469,12 +485,36 @@
       });
     }
 
+    // Sanitizador para decimales positivos (permite un punto decimal)
+    function sanitizePositiveDecimalInput(el) {
+      if (!el) return;
+      el.addEventListener('input', () => {
+        let v = String(el.value).replace(/[^0-9.]/g, '');
+        // permitir solo un punto
+        const parts = v.split('.');
+        if (parts.length > 2) {
+          v = parts[0] + '.' + parts.slice(1).join('');
+        }
+        // quitar ceros a la izquierda (mantener '0' si es el único)
+        if (v.length > 1 && v.startsWith('0') && !v.startsWith('0.')) {
+          v = v.replace(/^0+/, '');
+        }
+        el.value = v;
+      });
+      el.addEventListener('paste', (e) => {
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        if (!/^[0-9]*\.?[0-9]*$/.test(text)) {
+          e.preventDefault();
+        }
+      });
+    }
+
     // Aplicar sanitización a los campos enteros del formulario
     sanitizePositiveIntegerInput(document.getElementById('dias-gracia-extra'));
     sanitizePositiveIntegerInput(document.getElementById('abono-refrendo'));
     sanitizePositiveIntegerInput(document.getElementById('abono-capital'));
-    sanitizePositiveIntegerInput(document.getElementById('input-recargos'));
-    sanitizePositiveIntegerInput(document.getElementById('input-multa'));
+    sanitizePositiveDecimalInput(document.getElementById('input-recargos'));
+    sanitizePositiveDecimalInput(document.getElementById('input-multa'));
 
     // Helper para escapar texto usado en HTML
     function escapeHtml(unsafe) {
