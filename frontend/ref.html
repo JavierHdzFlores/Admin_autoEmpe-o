@@ -109,10 +109,7 @@
             <span class="icon">&#9881;</span> Acciones y Ajustes de Pago
           </h3>
           <div class="form-grid cols-3">
-            <div class="input-group">
-              <label for="dias-gracia-extra">Añadir Días de Gracia Extra</label>
-              <input type="number" id="dias-gracia-extra" name="dias-gracia-extra" value="2" min="0" step="1" inputmode="numeric" pattern="^\\d+$">
-            </div>
+            <!-- Campo eliminado: 'Añadir Días de Gracia Extra' movido a administración de clientes -->
             <div class="input-group">
               <label for="abono-refrendo">Abono a Refrendo ($)</label>
               <input type="number" id="abono-refrendo" name="abono-refrendo" step="1" min="0" inputmode="numeric" pattern="^\\d+$" placeholder="0">
@@ -510,7 +507,6 @@
     }
 
     // Aplicar sanitización a los campos enteros del formulario
-    sanitizePositiveIntegerInput(document.getElementById('dias-gracia-extra'));
     sanitizePositiveIntegerInput(document.getElementById('abono-refrendo'));
     sanitizePositiveIntegerInput(document.getElementById('abono-capital'));
     sanitizePositiveDecimalInput(document.getElementById('input-recargos'));
