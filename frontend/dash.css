@@ -323,7 +323,7 @@ table tbody tr:nth-child(even) {
 
 /* 2. Desempeño */
 .status-desempeno-accion {
-    background-color: #28a745; /* Verde */
+    background-color: #113b64; /* Verde */
     color: white;
 }
 
@@ -335,7 +335,7 @@ table tbody tr:nth-child(even) {
 
 /* 4. Nuevo Empeño (por defecto) */
 .status-nuevo-empeno {
-    background-color: var(--color-azul-oscuro); 
+    background-color: #28a745; 
     color: white;
 }
 
