@@ -838,7 +838,7 @@ table tbody tr:nth-child(even) {
 
 /* 3. Estado Desempeñado (Azul Oscuro) */
 .status-desempenado {
-  background-color: var(--color-azul-oscuro); /* Cambiado a Azul Oscuro para que destaque */
+  background-color: #113b64; /* Cambiado a Azul Oscuro para que destaque */
 }
 
 /* 4. Estado Vendido (Café) */
