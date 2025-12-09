@@ -181,6 +181,10 @@
                     <label>Fecha Vencimiento</label>
                     <input type="date" id="edit-fecha-vencimiento">
                 </div>
+                <div class="input-group">
+                  <label>Días de Gracia Extra</label>
+                  <input type="number" id="edit-dias-gracia" value="2" min="0" step="1" inputmode="numeric" pattern="^\\d+$">
+                </div>
             </div>
 
             <div class="form-actions" style="margin-top: 20px;">
@@ -527,6 +531,12 @@
     // Inicializar
     document.addEventListener('DOMContentLoaded', cargarTabla);
 
+    // Aplicar sanitización al campo de días de gracia (si existe)
+    document.addEventListener('DOMContentLoaded', () => {
+      const el = document.getElementById('edit-dias-gracia');
+      if (el) sanitizePositiveIntegerInput(el);
+    });
+
 
 
     // --- FUNCIÓN PARA ABRIR EL EDITOR ---
@@ -554,6 +564,11 @@
       document.getElementById('edit-estado').value = item.estado; // Select inteligente
       document.getElementById('edit-fecha-empeno').value = item.fecha_empeno;
       document.getElementById('edit-fecha-vencimiento').value = item.fecha_vencimiento;
+      // Poblamos el campo de Días de Gracia Extra si existe en el objeto (no se envía todavía al backend)
+      const diasGraciaEl = document.getElementById('edit-dias-gracia');
+      if (diasGraciaEl) {
+        diasGraciaEl.value = (item.dias_gracia_extra !== undefined && item.dias_gracia_extra !== null) ? item.dias_gracia_extra : diasGraciaEl.value || 2;
+      }
 
         // 3. MOSTRAR EL FORMULARIO (Quitamos el display: none)
         const seccion = document.getElementById('seccion-editar-cliente');
@@ -622,6 +637,24 @@
       return (s || '').toString().toLowerCase().trim().replace(/\s+/g, ' ');
     }
 
+    // Sanitizador para enteros positivos (usado en el campo Días de Gracia)
+    function sanitizePositiveIntegerInput(el) {
+      if (!el) return;
+      el.addEventListener('input', () => {
+        let v = String(el.value).replace(/[^0-9]/g, '');
+        if (v.length > 1 && v.startsWith('0')) {
+          v = v.replace(/^0+/, '');
+        }
+        el.value = v;
+      });
+      el.addEventListener('paste', (e) => {
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        if (!/^[0-9]+$/.test(text)) {
+          e.preventDefault();
+        }
+      });
+    }
+
     // Actualiza las cards (estadísticas) para un cliente específico.
     // Prioriza comparar por cliente_id; si no existe, compara nombre+apellidos+dirección.
     function actualizarEstadisticasParaCliente(item) {
@@ -670,6 +703,8 @@
           fecha_empeno: document.getElementById('edit-fecha-empeno').value,
           fecha_vencimiento: document.getElementById('edit-fecha-vencimiento').value
       };
+
+          // Nota: por ahora no enviamos 'dias de gracia' al backend. Podemos añadirlo cuando lo implementes.
 
       try {
           // 3. Enviar al Backend (PUT)
