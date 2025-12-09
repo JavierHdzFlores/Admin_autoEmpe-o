@@ -164,21 +164,21 @@
                     const tr = document.createElement('tr');
 
                     // Normalizar acción para comparaciones más tolerantes
-                    const accionNorm = (fila.accion || '').toString().toLowerCase().trim();
-
+                    const accionNorm = (fila.accion || '').toString().toLowerCase().trim().replace(/\s/g, '');
                     // LÓGICA DE COLORES SEGÚN ACCIÓN (más flexible)
                     let badgeClass = 'status-nuevo-empeno'; // Color por defecto (p.ej., Nuevo Empeño)
 
-                    if (accionNorm === 'venta remate') {
+                    // Comparamos sin espacios ni mayúsculas:
+                    if (accionNorm === 'ventaremate') {
                       badgeClass = 'status-venta-remate'; 
-                    } else if (accionNorm === 'desempeño') {
+                    } else if (accionNorm === 'desempeño' || accionNorm === 'desempeno') {
+                      // Se comprueba con y sin acento por si el backend varía
                       badgeClass = 'status-desempeno-accion'; 
                     } else if (accionNorm === 'refrendo') {
                       badgeClass = 'status-refrendo-accion'; 
-                    } else if (accionNorm === 'reevalúo') {
+                    } else if (accionNorm === 'reevalúo' || accionNorm === 'reevaluo') {
                       badgeClass = 'status-reevaluo-accion';
                     }
-
                     // Formato de moneda (asegurarnos número)
                     const montoVal = Number(fila.monto) || 0;
                     const signo = montoVal < 0 ? '-' : '+';
