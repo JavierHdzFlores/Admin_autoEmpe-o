@@ -812,25 +812,41 @@ table tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-/* Estilos para las etiquetas de ESTADO */
+/* ******************************************* */
+/* 🎯 ESTILOS CORREGIDOS PARA ETIQUETAS DE ESTADO */
+/* ******************************************* */
 .status {
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: 6px; /* Hacemos el radio más pequeño */
   font-size: 12px;
   font-weight: bold;
-  color: black;
-  display: inline-block;
+  color: white; /* CRÍTICO: Cambiamos a texto blanco para el contraste */
+  display: inline-block; /* CRÍTICO: Asegura que el padding se aplique */
   text-align: center;
+  min-width: 80px; /* Ancho mínimo para que se vea bien */
 }
+
+/* 1. Estado Vigente (Verde) */
 .status-vigente {
   background-color: #28a745; /* Verde */
 }
-.status-desempenado {
-  background-color: var(--color-azul-medio); /* Azul */
-}
+
+/* 2. Estado Vencido (Rojo) */
 .status-vencido {
   background-color: #dc3545; /* Rojo */
 }
+
+/* 3. Estado Desempeñado (Azul Oscuro) */
+.status-desempenado {
+  background-color: var(--color-azul-oscuro); /* Cambiado a Azul Oscuro para que destaque */
+}
+
+/* 4. Estado Vendido (Café) */
+.status-vendido {
+  background-color: #795548; /* Café/Marrón solicitado */
+}
+
+/* 5. Estado Rematado (Gris/Plomo) */
 .status-rematado {
   background-color: #6c757d; /* Gris */
 }
