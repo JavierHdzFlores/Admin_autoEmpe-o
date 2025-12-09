@@ -787,33 +787,44 @@ table tbody tr:nth-child(even) {
   font-size: 1.05em;
 }
 
+
 .status {
   padding: 4px 10px;
   border-radius: 6px; 
   font-size: 12px;
   font-weight: bold;
-  color: white; /* CRÍTICO: Texto blanco para contraste */
-  display: inline-block; /* CRÍTICO: Asegura que el padding se aplique */
+  color: white; /* Texto blanco para contraste */
+  display: inline-block; 
   text-align: center;
   min-width: 80px; 
 }
 
-/* 1. Estado EN VENTA (usamos verde para destacar que está listo para venderse) */
-.status-en-venta {
-  background-color: #28a745; /* Verde */
+/* 1. ESTADO VIGENTE (Verde) */
+.status-vigente {
+  background-color: #28a745; 
 }
 
-/* 2. Estado VENDIDO (usamos un color neutral) */
+/* 2. ESTADO VENDIDO (Café/Marrón) */
 .status-vendido {
-  background-color: #6c757d; /* Gris */
-}
-/* =LETRA MÁS PEQUEÑA EN LA TABLA DE REMATE PARA QUE QUEPA */
-.remate-list-content th,
-.remate-list-content td {
-  font-size: 13px;
-  padding: 10px 12px;
+  background-color: #795548; 
 }
 
+/* 3. ESTADO REMATADO (GRIS solicitado - Usado para artículos en Remate listos para venderse) */
+.status-rematado,
+.status-en-venta { /* Se usa 'en-venta' o 'rematado' en el código JS */
+  background-color: #6c757d; /* Gris Plomo */
+  color: white;
+}
+
+/* 4. ESTADO DESEMPEÑADO (Azul corporativo) */
+.status-desempenado {
+  background-color: var(--color-azul-oscuro); 
+}
+
+/* 5. Estado Vencido (Rojo - si lo usas en el historial) */
+.status-vencido {
+  background-color: #dc3545; 
+}
 
 /* =======================================================
    10. AJUSTES RESPONSIVE (EXISTENTES)
