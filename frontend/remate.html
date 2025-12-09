@@ -175,18 +175,21 @@ function renderizarTabla(lista) {
 
     const fechaIngreso = item.fecha_empeno || item.fecha_ingreso || item.fecha_vencimiento || '-';
 
-    // Estado y acción
-    const estadoTxt = item.estado || 'Disponible';
+    // Estado original del backend (puede ser 'Rematado', 'Vendido', 'Disponible', etc.)
+    const estadoOriginal = item.estado || 'Disponible';
     
-    // 💡 CORRECCIÓN: Estandarizar la clase CSS (Rematado/Disponible = en-venta)
+    // 👇 AJUSTE DE TEXTO SOLICITADO: CAMBIAR 'Rematado' a 'Disponible' para la vista
+    const estadoTxt = estadoOriginal === 'Rematado' ? 'Disponible' : estadoOriginal;
+    
+    // 💡 CORRECCIÓN DE CLASE: Estandarizar el color (Rematado/Disponible = en-venta)
     let estadoClase;
-    // Si el estado es 'Disponible' o 'Rematado' (sin ñ), lo consideramos 'en-venta'
-    if (estadoTxt === 'Disponible' || estadoTxt === 'Disponible') {
+    // Usamos el estadoOriginal para determinar la clase de color
+    if (estadoOriginal === 'Disponible' || estadoOriginal === 'Rematado') {
         estadoClase = 'en-venta'; 
-    } else if (estadoTxt === 'Vendido') {
+    } else if (estadoOriginal === 'Vendido') {
         estadoClase = 'vendido'; 
     } else {
-        // En caso de un estado desconocido, usamos el estado de venta
+        // Para cualquier otro estado no esperado, lo tratamos como 'en-venta' (Disponible)
         estadoClase = 'en-venta'; 
     }
 
@@ -198,21 +201,22 @@ function renderizarTabla(lista) {
     const tdPrecioVen = document.createElement('td'); 
     tdPrecioVen.style.fontWeight = '600'; 
     
-    if (precioAdquirido !== null && estadoTxt === 'Vendido') {
+    if (precioAdquirido !== null && estadoOriginal === 'Vendido') {
       tdPrecioVen.className = 'price-venta';
     }
     tdPrecioVen.textContent = precioAdquirido !== null ? formatoMoneda.format(precioAdquirido) : '-';
     
     const tdFecha = document.createElement('td'); tdFecha.textContent = fechaIngreso;
     
-    // Aplicar clase CSS estandarizada
-    const tdEstado = document.createElement('td'); tdEstado.innerHTML = `<span class="status status-${estadoClase}">${escapeHtml(String(estadoTxt))}</span>`;
+    // Aplicar clase CSS estandarizada, usando el texto ajustado
+    const tdEstado = document.createElement('td'); 
+    tdEstado.innerHTML = `<span class="status status-${estadoClase}">${escapeHtml(String(estadoTxt))}</span>`;
     
     const tdAccion = document.createElement('td');
 
-    // 👇 RESTAURACIÓN Y MEJORA DE LA LÓGICA DEL BOTÓN
+    // 👇 LÓGICA DEL BOTÓN
     // El botón solo debe aparecer si el artículo no ha sido vendido.
-    if (estadoTxt !== 'Vendido') {
+    if (estadoOriginal !== 'Vendido') {
       const btn = document.createElement('button');
       btn.className = 'btn-vender';
       btn.textContent = '💲 Vender';
