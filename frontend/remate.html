@@ -149,7 +149,8 @@
     });
 
     // 2. DIBUJAR TABLA
-    function renderizarTabla(lista) {
+    // 2. DIBUJAR TABLA (CORREGIDO: Clase Status Estándar y Lógica de Botón Vender)
+function renderizarTabla(lista) {
   const tbody = document.getElementById('tabla-remates-body');
   // Limpiar de forma segura
   while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
@@ -177,14 +178,16 @@
     // Estado y acción
     const estadoTxt = item.estado || 'Disponible';
     
-    // 💡 CORRECCIÓN: Estandarizar la clase CSS
+    // 💡 CORRECCIÓN: Estandarizar la clase CSS (Rematado/Disponible = en-venta)
     let estadoClase;
+    // Si el estado es 'Disponible' o 'Rematado' (sin ñ), lo consideramos 'en-venta'
     if (estadoTxt === 'Disponible' || estadoTxt === 'Rematado') {
         estadoClase = 'en-venta'; 
     } else if (estadoTxt === 'Vendido') {
         estadoClase = 'vendido'; 
     } else {
-        estadoClase = 'default';
+        // En caso de un estado desconocido, usamos el estado de venta
+        estadoClase = 'en-venta'; 
     }
 
     const tdFolio = document.createElement('td'); tdFolio.textContent = folio;
@@ -194,7 +197,7 @@
     
     const tdPrecioVen = document.createElement('td'); 
     tdPrecioVen.style.fontWeight = '600'; 
-    // Aplicamos la clase 'price-venta' si ya está vendido y tiene precio
+    
     if (precioAdquirido !== null && estadoTxt === 'Vendido') {
       tdPrecioVen.className = 'price-venta';
     }
@@ -202,25 +205,28 @@
     
     const tdFecha = document.createElement('td'); tdFecha.textContent = fechaIngreso;
     
-    // Aplicar clase CSS estandarizada: USAMOS LA CLASE BASE .status
+    // Aplicar clase CSS estandarizada
     const tdEstado = document.createElement('td'); tdEstado.innerHTML = `<span class="status status-${estadoClase}">${escapeHtml(String(estadoTxt))}</span>`;
     
     const tdAccion = document.createElement('td');
 
-    // Acción: botón vender solo si está en Disponible
-    if (estadoTxt === 'Disponible') {
+    // 👇 RESTAURACIÓN Y MEJORA DE LA LÓGICA DEL BOTÓN
+    // El botón solo debe aparecer si el artículo no ha sido vendido.
+    if (estadoTxt !== 'Vendido') {
       const btn = document.createElement('button');
       btn.className = 'btn-vender';
       btn.textContent = '💲 Vender';
+      // Asignar el evento al botón
       btn.addEventListener('click', () => venderArticulo(item.id, articulo, precioSugerido));
       tdAccion.appendChild(btn);
-    } else if (estadoTxt === 'Vendido') {
+    } else {
       // Si ya está vendido, mostramos una etiqueta de estado (texto) con estilo
       const soldTag = document.createElement('span');
       soldTag.className = 'sold-label';
       soldTag.textContent = 'Artículo Vendido';
       tdAccion.appendChild(soldTag);
     }
+    // 👆 FIN DE LA LÓGICA DEL BOTÓN
 
     tr.appendChild(tdFolio);
     tr.appendChild(tdCliente);
